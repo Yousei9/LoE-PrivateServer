@@ -277,10 +277,11 @@ void receiveMessage(Player* player)
 
             sendLoadSceneRPC(player, player->pony.sceneName, player->pony.pos);
             // Send instantiate to the players of the new scene
-            Scene* scene = findScene(player->pony.sceneName);
-            for (int i=0; i<scene->players.size(); i++)
-                if (scene->players[i]->pony.netviewId!=player->pony.netviewId && scene->players[i]->inGame>=2)
-                    sendNetviewInstantiate(&player->pony, scene->players[i]);
+            // removed according to bug report 73: Duplicate server sided ponies instantiated on scene load
+//            Scene* scene = findScene(player->pony.sceneName);
+//            for (int i=0; i<scene->players.size(); i++)
+//                if (scene->players[i]->pony.netviewId!=player->pony.netviewId && scene->players[i]->inGame>=2)
+//                    sendNetviewInstantiate(&player->pony, scene->players[i]);
 
             //Send the 46s init messages
             //app.logMessage(QString("UDP: Sending the 46 init messages"));

@@ -15,7 +15,7 @@
 
 #define MAX_INVENTORY_SIZE 12
 #define MAX_WORN_ITEMS 32
-#define PONYDATA_SIZE 50 // Size of the PonyData minus the name
+#define PONYDATA_SIZE 43 // Size of the PonyData minus the name
 
 struct Pony : public SceneEntity, public StatsComponent
 {

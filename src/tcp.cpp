@@ -371,7 +371,7 @@ void App::tcpProcessData(QByteArray data, QTcpSocket* socket)
             {
                 // HTTP reply template
                 static const QByteArray data1 = QByteArray::fromHex("0D0A61757468726573706F6E73653A0A747275650A");
-                static const QByteArray data2 = QByteArray::fromHex("0A310A310A");
+                static const QByteArray data2 = QByteArray::fromHex("0A310A");
                 static const QByteArray data3 = QByteArray::fromHex("0D0A300D0A0D0A");
 
                 QByteArray customData = file.readAll();

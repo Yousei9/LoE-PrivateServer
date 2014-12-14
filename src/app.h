@@ -29,7 +29,7 @@
 #include "CoreFoundation/CoreFoundation.h"
 #endif
 
-#define VERSIONSTRING "v0.6"
+#define VERSIONSTRING "v0.5.4"
 
 #define GAMEDATAPATH "data/data/"
 #define PLAYERSPATH "data/players/"

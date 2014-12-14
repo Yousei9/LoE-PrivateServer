@@ -4,6 +4,7 @@
 #
 #-------------------------------------------------
 
+VERSION = 0.5.4
 QT       += core network
 
 # build as a console application
