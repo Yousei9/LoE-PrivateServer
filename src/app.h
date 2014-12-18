@@ -90,6 +90,9 @@ public slots:
     void stopGameServer(); // Calls stopGameServer(true)
     void stopGameServer(bool log);
 
+    /// GameClient
+    void startGameClient();
+
     /// UDP/TCP
 public slots:
     void tcpConnectClient();
@@ -113,6 +116,7 @@ private slots:
     void on_toggleLoginServerButton_clicked();
     void on_toggleGameServerButton_clicked();
     void on_exitButton_clicked();
+    void on_startClientButton_clicked();
     void on_configSaveSettings_clicked();
     void on_configReloadSettings_clicked();
     void on_configResetSettings_clicked();

@@ -220,6 +220,11 @@ void App::on_exitButton_clicked()
     app.shutdown();
 }
 
+void App::on_startClientButton_clicked()
+{
+    app.startGameClient();
+}
+
 void App::on_configSaveSettings_clicked()
 {
     app.loadConfigFromGui();

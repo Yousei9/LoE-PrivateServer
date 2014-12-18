@@ -15,6 +15,7 @@
 #include <QUdpSocket>
 #include <QSettings>
 #include <QDir>
+#include <QProcess>
 
 #if defined _WIN32 || defined WIN32
 #include <windows.h>
@@ -542,5 +543,35 @@ void App::stopGameServer(bool log)
 #ifdef USE_GUI
     app.ui->toggleGameServerButton->setText(tr("Start Game Server"));
     app.ui->gameStatus->setText("<font color=\"#993333\">OFFLINE</font>");
+#endif
+}
+
+/// start a new instance of the game client
+void App::startGameClient()
+{
+#if defined WIN32 || defined _WIN32
+    // get working directory
+    QString clientPath = QCoreApplication::applicationDirPath();
+    clientPath.append("/LoE.exe");
+
+    // check if client application exists
+    QFile clientApp(clientPath);
+    if (clientApp.exists()){
+        // start client in seperate process
+        if (QProcess::startDetached(clientPath, QStringList()))
+        {
+            logMessage("Game started.");
+        }
+        else
+        {
+            logMessage("Couldn't start game.");
+        }
+    }
+    else
+    {
+        logMessage(tr("Game executable '%1' not found.").arg(clientPath));
+    }
+#else
+    //TODO: start client in non win enviroment
 #endif
 }
