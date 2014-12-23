@@ -1,0 +1,18 @@
+# Metadata
+name Captain Woodstock
+scene Ponyville
+pos -215.359 -195.309 84.4123
+rot 0 0.91168 0 1
+ponyData EUNhcHRhaW4gV29vZHN0b2NrAgOlAAAAAAAAAAAAAAAAIJBmqf////+Nm//Zz+QNAAQAAAAAAM3MjD/EkQ==
+# If you get errors, make sure this quest id is unique.
+questId 58703
+questName Captain Woodstock
+questDescr Captain Woodstock
+wear 57 54 56 67 55
+shop 57 54 56 67 55
+
+# Dialog
+say HALT! You cant go in the Evershade unprepared. Take some supplies.
+end 
+
+# Labels

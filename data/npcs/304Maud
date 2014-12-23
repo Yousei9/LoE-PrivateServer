@@ -1,0 +1,32 @@
+# Metadata
+name Maud Pie
+scene Canterlot
+pos -160.911 5.76805 -50.2188
+rot 0 -0.50 0 1
+ponyData CE1hdWQgUGllAQKsAAAAAAAAAAAAAACIdKmIdKmrqrJ52MRoY4MPAAUAAAAAAIH6gD+Qbg==
+# If you get errors, make sure this quest id is unique.
+questId 58704
+questName Maud Pie
+questDescr Maud Pie
+
+# Dialog
+say Hello.
+answer D-End Hi.
+answer D-Explain1 What are you doing?
+answer D-RockGarden Do you like this rock garden?
+
+label D-End
+end
+
+label D-Explain1
+say Sightseeing.
+answer D-Explain2 What sights?
+
+label D-Explain2
+say The rocks of Canterlot.
+answer D-End Enjoy... I guess.
+end
+
+label D-RockGarden
+say It's nice.
+end

@@ -1,0 +1,29 @@
+# Metadata
+name Surprise
+scene SugarCubeCorner
+pos 3.668 -0.058 -4.471
+rot 0 0.271039 0 1
+#ponyData CFN1cnByaXNlAwJ0AAAAAAAAAAAAAAD//26f/+/////Mpv+awJIHAAcAAAAAAOW8gz/bkw==
+ponyData CFN1cnByaXNlAwJ0AAAAAAAAAAAAAAD//1qf/+/////Mpv+awJIHAAcAAAAAADk/gD/bkw==
+# If you get errors, make sure this quest id is unique.
+questId 58705
+questName Surprise
+questDescr Surprise
+shop 6 7 43 44 45 46 47 48 49 50
+
+# Dialog
+say Hi. Welcome to the party.
+answer D-End Hi.
+answer D-NotPinkie Who are you?
+
+label D-End
+end
+
+label D-NotPinkie
+say I'm Surprise silly. Did you expect to find a pink party pony here?
+answer D-End Nevermind.
+answer D-WrongCutie Your Cutie Mark is wrong.
+
+label D-WrongCutie
+say I had to pick something everypony knows. Strangely balloons are not known to most ponies.
+end

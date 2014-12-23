@@ -1,0 +1,19 @@
+# Metadata
+name Fluffle Puff
+scene Ponyville
+pos 89.5549 -195.304 377.279
+rot 0 -2.9151 0 1
+#ponyData DEZsdWZmbGUgUHVmZgECNQAAAAAAAAAAAAAA/9fm/9fm9NvjAOz/0sTGBAADAAAAAAC0EII/rG8=
+ponyData DEZsdWZmbGUgUHVmZgECNQAAAAAAAAAAAAAA/9fm/9fm9NvjAOz/0sTGBAADAAAAAAAc1n4/qW8=
+# If you get errors, make sure this quest id is unique.
+questId 58702
+questName Fluffle Puff
+questDescr Fluffle Puff
+wear 65
+shop 65 66
+
+# Dialog
+say pffftft pfpfffttff
+end 
+
+# Labels
