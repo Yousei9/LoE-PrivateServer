@@ -3,7 +3,7 @@ Legends of Equestria Private Server
 
 This is an open source Private Server for the game Legends of Equestria, to play even when the official servers are closed.
 The official release is for Windows (x86 and x64). The server should work on Linux and Mac too, but you'll need to compile it yourself.<br/>
-<h5><b><a href="https://github.com/tux3/LoE-PrivateServer/releases">Downloads</a></b></h5>
+<h5><b><a href="https://drive.google.com/folderview?id=0B91uVmaVElUhNTlOZlFTUGJhU3c#list">Downloads</a></b></h5>
 
 <h3>How to compile</h3>
 - Download <a href="https://qt-project.org/downloads">Qt 5.2.0 or later</a>
