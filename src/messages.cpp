@@ -31,7 +31,7 @@ void sendPonies(Player* player)
     for (int i=0;i<ponies.size();i++)
         data += ponies[i].ponyData;
 
-    logMessage(QObject::tr("UDP: Sending characters data to %1").arg(player->pony.netviewId));
+    logMessage(QObject::tr("UDP: Sending characters data to %1 (%2)").arg(player->pony.netviewId).arg(player->name));
     sendMessage(player, MsgUserReliableOrdered4, data);
 }
 

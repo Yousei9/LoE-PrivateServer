@@ -6,6 +6,7 @@
 #include "sync.h"
 #include "settings.h"
 #include "scene.h"
+#include <Qt>
 #include <QDir>
 
 using namespace Settings;
@@ -40,7 +41,7 @@ void App::sendCmdLine()
     QString str = cin.readLine();
 #endif
 
-    if (str.startsWith("help"))
+    if (str.startsWith("help", Qt::CaseInsensitive))
     {
         QString indent = "  -";
 
@@ -152,7 +153,7 @@ void App::sendCmdLine()
 #endif
         return;
     }
-    else if (str.startsWith("start"))
+    else if (str.startsWith("start", Qt::CaseInsensitive))
     {
         QString target = str.right(str.length() - QString("start ").length());
 
@@ -172,7 +173,7 @@ void App::sendCmdLine()
 
         return;
     }
-    else if (str.startsWith("stop"))
+    else if (str.startsWith("stop", Qt::CaseInsensitive))
     {
         QString target = str.right(str.length() - QString("stop ").length());
 
@@ -192,7 +193,7 @@ void App::sendCmdLine()
 
         return;
     }
-    else if (str.startsWith("status"))
+    else if (str.startsWith("status", Qt::CaseInsensitive))
     {
         // Login server
         if (app.loginServerUp)
@@ -232,7 +233,7 @@ void App::sendCmdLine()
         }
         return;
     }
-    else if (str.startsWith("setPeer"))
+    else if (str.startsWith("setPeer", Qt::CaseInsensitive))
     {
         if (Player::udpPlayers.size() == 1)
         {
@@ -285,14 +286,15 @@ void App::sendCmdLine()
             logMessage(QObject::tr("UDP: Peer not found (%1)").arg(str));
         return;
     }
-    else if (str.startsWith("listPeers"))
+    else if (str.startsWith("listPeers", Qt::CaseInsensitive))
     {
         if (str.size()<=10)
         {
             for (int i=0; i<Player::udpPlayers.size();i++)
                 app.logMessage(QString().setNum(Player::udpPlayers[i]->pony.id)
                                +" ("+QString().setNum(Player::udpPlayers[i]->pony.netviewId)+")"
-                               +"   "+Player::udpPlayers[i]->pony.name
+                               +"   "+Player::udpPlayers[i]->name
+                               +" / "+Player::udpPlayers[i]->pony.name
                                +"   "+Player::udpPlayers[i]->IP
                                +":"+QString().setNum(Player::udpPlayers[i]->port)
                                +"   "+QString().setNum((int)timestampNow()-Player::udpPlayers[i]->lastPingTime)+"s");
@@ -309,7 +311,7 @@ void App::sendCmdLine()
                                +" "+QString().setNum((int)timestampNow()-Player::udpPlayers[i]->lastPingTime)+"s");
         return;
     }
-    else if (str.startsWith("listVortexes"))
+    else if (str.startsWith("listVortexes", Qt::CaseInsensitive))
     {
         for (int i=0; i<Scene::scenes.size(); i++)
         {
@@ -323,7 +325,7 @@ void App::sendCmdLine()
         }
         return;
     }
-    else if (str.startsWith("sync"))
+    else if (str.startsWith("sync", Qt::CaseInsensitive))
     {
         logMessage(QObject::tr("UDP: Syncing manually"));
         sync->doSync();
@@ -337,7 +339,7 @@ void App::sendCmdLine()
             sendLoadSceneRPC(Player::udpPlayers[i], "GemMines");
         return;
     }
-    else if (str.startsWith("dbgStressLoad"))
+    else if (str.startsWith("dbgStressLoad", Qt::CaseInsensitive))
     {
         str = str.mid(14);
         // Send all the players to the given scene at the same time
@@ -345,7 +347,7 @@ void App::sendCmdLine()
             sendLoadSceneRPC(Player::udpPlayers[i], str);
         return;
     }
-    else if (str.startsWith("tele"))
+    else if (str.startsWith("tele", Qt::CaseInsensitive))
     {
         str = str.right(str.size()-5);
         QStringList args = str.split(' ');
@@ -409,45 +411,45 @@ void App::sendCmdLine()
     }
 
     // User commands from now on (requires setPeer)
-    if (str.startsWith("disconnect"))
+    if (str.startsWith("disconnect", Qt::CaseInsensitive))
     {
         logMessage(QObject::tr("UDP: Disconnecting"));
         sendMessage(cmdPeer,MsgDisconnect, "You were kicked by the server admin");
         Player::disconnectPlayerCleanup(cmdPeer); // Save game and remove the player
     }
-    else if (str.startsWith("load"))
+    else if (str.startsWith("load", Qt::CaseInsensitive))
     {
         str = str.mid(5);
         sendLoadSceneRPC(cmdPeer, str);
     }
-    else if (str.startsWith("getPos"))
+    else if (str.startsWith("getPos", Qt::CaseInsensitive))
     {
-        logMessage(QObject::tr("Pos : ","Short for position") + QString().setNum(cmdPeer->pony.pos.x)
+        logMessage(QObject::tr("pos ","Short for position") + QString().setNum(cmdPeer->pony.pos.x)
                    + " " + QString().setNum(cmdPeer->pony.pos.y)
                    + " " + QString().setNum(cmdPeer->pony.pos.z));
     }
-    else if (str.startsWith("getRot"))
+    else if (str.startsWith("getRot", Qt::CaseInsensitive))
     {
-        logMessage(QObject::tr("Rot : x=","Short for rotation") + QString().setNum(cmdPeer->pony.rot.x)
-                   + ", y=" + QString().setNum(cmdPeer->pony.rot.y)
-                   + ", z=" + QString().setNum(cmdPeer->pony.rot.z)
-                   + ", w=" + QString().setNum(cmdPeer->pony.rot.w));
+        logMessage(QObject::tr("rot ","Short for rotation") + QString().setNum(cmdPeer->pony.rot.x)
+                   + " " + QString().setNum(cmdPeer->pony.rot.y)
+                   + " " + QString().setNum(cmdPeer->pony.rot.z)
+                   + " " + QString().setNum(cmdPeer->pony.rot.w));
     }
-    else if (str.startsWith("getPonyData"))
+    else if (str.startsWith("getPonyData", Qt::CaseInsensitive))
     {
         logMessage("ponyData : "+cmdPeer->pony.ponyData.toBase64());
     }
-    else if (str.startsWith("sendPonies"))
+    else if (str.startsWith("sendPonies", Qt::CaseInsensitive))
     {
         sendPonies(cmdPeer);
     }
-    else if (str.startsWith("sendUtils3"))
+    else if (str.startsWith("sendUtils3", Qt::CaseInsensitive))
     {
         logMessage(QObject::tr("UDP: Sending Utils3 request"));
         QByteArray data(1,3);
         sendMessage(cmdPeer,MsgUserReliableOrdered6,data);
     }
-    else if (str.startsWith("setPlayerId"))
+    else if (str.startsWith("setPlayerId", Qt::CaseInsensitive))
     {
         str = str.right(str.size()-12);
         QByteArray data(3,4);
@@ -463,7 +465,7 @@ void App::sendCmdLine()
         else
             logError(tr("Error : Player ID must be a number"));
     }
-    else if (str.startsWith("reloadNpc"))
+    else if (str.startsWith("reloadNpc", Qt::CaseInsensitive))
     {
         str = str.mid(10);
         Pony* npc = NULL;
@@ -499,7 +501,7 @@ void App::sendCmdLine()
         else
             logMessage(tr("NPC not found"));
     }
-    else if (str.startsWith("removekill"))
+    else if (str.startsWith("removekill", Qt::CaseInsensitive))
     {
         str = str.right(str.size()-11);
         QByteArray data(4,2);
@@ -516,7 +518,7 @@ void App::sendCmdLine()
         else
             logError(tr("Error : Removekill needs the id of the view to remove"));
     }
-    else if (str.startsWith("remove"))
+    else if (str.startsWith("remove", Qt::CaseInsensitive))
     {
         str = str.right(str.size()-7);
         QByteArray data(3,2);
@@ -532,7 +534,7 @@ void App::sendCmdLine()
         else
             logError(tr("Error : Remove needs the id of the view to remove"));
     }
-    else if (str.startsWith("sendPonyData"))
+    else if (str.startsWith("sendPonyData", Qt::CaseInsensitive))
     {
         QByteArray data(3,0xC8);
         data[0] = (quint8)(cmdPeer->pony.netviewId&0xFF);
@@ -541,7 +543,7 @@ void App::sendCmdLine()
         sendMessage(cmdPeer, MsgUserReliableOrdered18, data);
         return;
     }
-    else if (str.startsWith("setStat"))
+    else if (str.startsWith("setStat", Qt::CaseInsensitive))
     {
         str = str.right(str.size()-8);
         QStringList args = str.split(' ');
@@ -560,7 +562,7 @@ void App::sendCmdLine()
         }
         sendSetStatRPC(cmdPeer, statID, statValue);
     }
-    else if (str.startsWith("setMaxStat"))
+    else if (str.startsWith("setMaxStat", Qt::CaseInsensitive))
     {
         str = str.right(str.size()-11);
         QStringList args = str.split(' ');
@@ -579,7 +581,7 @@ void App::sendCmdLine()
         }
         sendSetMaxStatRPC(cmdPeer, statID, statValue);
     }
-    else if (str.startsWith("instantiate"))
+    else if (str.startsWith("instantiate", Qt::CaseInsensitive))
     {
         if (str == "instantiate")
         {
@@ -655,21 +657,21 @@ void App::sendCmdLine()
         logMessage(tr("UDP: Instantiating %1").arg(args[0]));
         sendMessage(cmdPeer,MsgUserReliableOrdered6,data);
     }
-    else if (str.startsWith("beginDialog"))
+    else if (str.startsWith("beginDialog", Qt::CaseInsensitive))
     {
         QByteArray data(1,0);
         data[0] = 11; // Request number
 
         sendMessage(cmdPeer,MsgUserReliableOrdered4, data);
     }
-    else if (str.startsWith("endDialog"))
+    else if (str.startsWith("endDialog", Qt::CaseInsensitive))
     {
         QByteArray data(1,0);
         data[0] = 13; // Request number
 
         sendMessage(cmdPeer,MsgUserReliableOrdered4, data);
     }
-    else if (str.startsWith("setDialogMsg"))
+    else if (str.startsWith("setDialogMsg", Qt::CaseInsensitive))
     {
         str = str.right(str.size()-13);
         QStringList args = str.split(" ", QString::SkipEmptyParts);
@@ -687,13 +689,13 @@ void App::sendCmdLine()
             sendMessage(cmdPeer,MsgUserReliableOrdered4, data);
         }
     }
-    else if (str.startsWith("setDialogOptions"))
+    else if (str.startsWith("setDialogOptions", Qt::CaseInsensitive))
     {
         str = str.right(str.size()-17);
         QStringList args = str.split(" ", QString::SkipEmptyParts);
         sendDialogOptions(cmdPeer, args);
     }
-    else if (str.startsWith("move"))
+    else if (str.startsWith("move", Qt::CaseInsensitive))
     {
         str = str.right(str.size()-5);
         QByteArray data(1,0);
@@ -706,7 +708,7 @@ void App::sendCmdLine()
 
         sendMove(cmdPeer, coords[0].toFloat(), coords[1].toFloat(), coords[2].toFloat());
     }
-    else if (str.startsWith("error"))
+    else if (str.startsWith("error", Qt::CaseInsensitive))
     {
         str = str.right(str.size()-6);
         QByteArray data(1,0);

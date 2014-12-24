@@ -149,7 +149,7 @@ void receiveMessage(Player* player)
             logMessage(QObject::tr("UDP: Received duplicate connect ACK"));
         else
         {
-            logMessage(QObject::tr("UDP: Connected to client"));
+            logMessage(QObject::tr("UDP: %3 connected to %1:%2").arg(player->IP).arg(player->port).arg(player->name));
             player->connected=true;
             for (int i=0; i<32; i++) // Reset sequence counters
                 player->udpSequenceNumbers[i]=0;
