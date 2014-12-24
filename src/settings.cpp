@@ -18,3 +18,4 @@ bool Settings::enableGameServer; // Starts a game server
 bool Settings::enableMultiplayer; // Sync players' positions
 bool Settings::enableGetlog; // Enable GET /log requests
 bool Settings::enablePVP; // Enables player versus player fights
+bool Settings::autostartClient; // Enables Game Client autostart

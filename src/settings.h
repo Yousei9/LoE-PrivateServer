@@ -25,6 +25,7 @@
 #define DEFAULT_PING_TIMEOUT 25
 #define DEFAULT_PING_CHECK 3000
 #define DEFAULT_ENABLE_PVP false
+#define DEFAULT_AUTOSTART_CLIENT true
 
 namespace Settings
 {
@@ -47,6 +48,7 @@ extern bool enableGameServer; // Starts a game server
 extern bool enableMultiplayer; // Sync players' positions
 extern bool enableGetlog; // Enable GET /log requests
 extern bool enablePVP; // Enables player versus player fights
+extern bool autostartClient; // Enables Game Client autostart
 
 }
 

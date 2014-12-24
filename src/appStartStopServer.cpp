@@ -96,6 +96,11 @@ void App::startup()
     /// Example Stuff
     logMessage("");
     app.printBasicHelp();
+
+    if (autostartClient)
+    {
+        startGameClient();
+    }
 }
 
 /// Shuts down the application
@@ -146,6 +151,7 @@ void App::loadConfig()
     useRemoteLogin = config.value("useRemoteLogin", DEFAULT_USE_REMOTE_LOGIN).toBool();
     enableGetlog = config.value("enableGetlog", DEFAULT_ENABLE_GETLOG).toBool();
     enablePVP = config.value("enablePVP", DEFAULT_ENABLE_PVP).toBool();
+    autostartClient = config.value("autostartClient",DEFAULT_AUTOSTART_CLIENT).toBool();
 
 #ifdef USE_GUI
     app.ui->loginPortConfig->setValue(loginPort);
@@ -163,6 +169,7 @@ void App::loadConfig()
     app.ui->syncIntervalConfig->setValue(syncInterval);
     app.ui->getlogConfig->setCheckable(enableGetlog);
     app.ui->pvpConfig->setChecked(enablePVP);
+    app.ui->enableClientAutostart->setChecked(autostartClient);
 #endif
 }
 
@@ -189,6 +196,7 @@ void App::loadConfigFromGui()
 //    useRemoteLogin = ;
     enableGetlog = app.ui->getlogConfig->isChecked();
     enablePVP = app.ui->pvpConfig->isChecked();
+    autostartClient = app.ui->enableClientAutostart->isChecked();
 }
 
 /// Reset GUI config options to defaults
@@ -209,6 +217,7 @@ void App::resetGuiConfigToDefault()
     app.ui->syncIntervalConfig->setValue(DEFAULT_SYNC_INTERVAL);
     app.ui->getlogConfig->setCheckable(DEFAULT_ENABLE_GETLOG);
     app.ui->pvpConfig->setChecked(DEFAULT_ENABLE_PVP);
+    app.ui->enableClientAutostart->setChecked(DEFAULT_AUTOSTART_CLIENT);
 }
 
 #endif
@@ -237,6 +246,7 @@ void App::saveConfig()
     config.setValue("useRemoteLogin", useRemoteLogin);
     config.setValue("enableGetlog", enableGetlog);
     config.setValue("enablePVP", enablePVP);
+    config.setValue("autostartClient", autostartClient);
 
     logStatusMessage(tr("Saved config file ..."));
 }
@@ -573,5 +583,6 @@ void App::startGameClient()
     }
 #else
     //TODO: start client in non win enviroment
+    logMessage("Game start not implemented on this platform.");
 #endif
 }
