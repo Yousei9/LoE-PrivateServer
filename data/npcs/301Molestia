@@ -13,7 +13,7 @@ questDescr Molestia
 say Hello there my sexy subject.
 answer D-Greeting Your highness.
 answer D-RunsAway *runs away*
-answer D-Bananas Do you like bananas?
+answer D-Bananas I heard you like bananas.
 end 
 
 label D-RunsAway
@@ -25,5 +25,5 @@ say You may continue worshipping the royal tush.
 end
 
 label D-Bananas
-say How about I show you how to eat more than one banana at once?
+say I can even show you how to eat two bananas at once.
 end
