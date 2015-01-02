@@ -8,6 +8,7 @@
 #include "settings.h"
 #include "udp.h"
 #include <QUdpSocket>
+#include <QDateTime>
 
 using namespace Settings;
 
@@ -40,7 +41,8 @@ App::App(QWidget *parent) :
 void App::logStatusMessage(QString msg)
 {
 #ifdef USE_GUI
-    ui->log->appendPlainText(msg);
+    QString logTime = QDateTime::currentDateTime().toString("HH:mm:ss");
+    ui->log->appendPlainText(logTime + "  " + msg);
     ui->status->setText(msg);
     ui->log->repaint();
     ui->status->repaint();
@@ -55,7 +57,8 @@ void App::logMessage(QString msg)
     if (!logInfos)
         return;
 #ifdef USE_GUI
-    ui->log->appendPlainText(msg);
+    QString logTime = QDateTime::currentDateTime().toString("HH:mm:ss");
+    ui->log->appendPlainText(logTime + "  " + msg);
     ui->log->repaint();
 #else
     cout << msg << endl;
@@ -70,7 +73,8 @@ void App::logStatusError(QString msg)
     defaultFormat.setForeground(QBrush(Qt::black));
     redFormat.setForeground(QBrush(Qt::red));
     ui->log->setCurrentCharFormat(redFormat);
-    ui->log->appendPlainText(msg);
+    QString logTime = QDateTime::currentDateTime().toString("HH:mm:ss");
+    ui->log->appendPlainText(logTime + "  " + msg);
     ui->status->setText(msg);
     ui->log->repaint();
     ui->status->repaint();
@@ -90,7 +94,8 @@ void App::logError(QString msg)
     defaultFormat.setForeground(QBrush(Qt::black));
     redFormat.setForeground(QBrush(Qt::red));
     ui->log->setCurrentCharFormat(redFormat);
-    ui->log->appendPlainText(msg);
+    QString logTime = QDateTime::currentDateTime().toString("HH:mm:ss");
+    ui->log->appendPlainText(logTime + "  " + msg);
     ui->log->repaint();
     ui->log->setCurrentCharFormat(defaultFormat);
 #else
