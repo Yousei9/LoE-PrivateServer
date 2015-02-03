@@ -120,7 +120,7 @@ void udpProcessPendingDatagrams()
             }
             else
             {
-                logMessage(QObject::tr("UDP: Sesskey rejected","The sesskey is a cryptographic hash, short for session key"));
+                logMessage(QObject::tr("UDP: %1:%2 Sesskey rejected","The sesskey is a cryptographic hash, short for session key").arg(rAddr.toString()).arg(rPort));
                 Player* newPlayer = new Player;
                 newPlayer->IP = rAddr.toString();
                 newPlayer->port = rPort;
@@ -137,7 +137,7 @@ void udpProcessPendingDatagrams()
         }
         else // You need to connect with TCP first
         {
-            logMessage(QObject::tr("UDP: Request from unknown peer rejected : %1:%2").arg(rAddr.toString()).arg(rPort));
+            logMessage(QObject::tr("UDP: Request from unknown peer %1:%2 rejected").arg(rAddr.toString()).arg(rPort));
             QString data("You're not connected, please login first. (aka the server has no idea who the hell you are)");
             QByteArray msg(6,0);
             msg[0] = MsgDisconnect;
