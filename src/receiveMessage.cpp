@@ -105,9 +105,13 @@ void receiveMessage(Player* player)
             }
         }
         else
-        {
-            if (player->nReceivedDups > 0) // If he stopped sending dups, forgive him slowly.
-                player->nReceivedDups--;
+        {            
+            if (player->nReceivedDups > 0) // reset dups counter if he stopped sending
+            {
+                logMessage(QObject::tr("UDP: Reset %1 dups received from %2")
+                           .arg(player->nReceivedDups).arg(player->pony.netviewId));
+                player->nReceivedDups = 0;
+            }
             //app.logMessage("UDP: Received message (="+QString().setNum(seq)
             //               +") from "+QString().setNum(player->pony.netviewId));
             player->udpRecvSequenceNumbers[channel] = seq;
