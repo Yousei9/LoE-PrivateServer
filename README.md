@@ -1,33 +1,22 @@
-Legends of Equestria Private Server
-===================================
+Legends of Equestria Private Server - Yousei
+============================================
 
 This is an open source Private Server for the game Legends of Equestria, to play even when the official servers are closed.
-The official release is for Windows (x86 and x64). The server should work on Linux and Mac too, but you'll need to compile it yourself.<br/>
-<h5><b><a href="https://drive.google.com/folderview?id=0B91uVmaVElUhNTlOZlFTUGJhU3c#list">Downloads</a></b></h5>
+The official release is for Windows. The server should work on Linux and Mac too, but you'll need to patch the client yourself.<br/>
+<h5><b>All Dowloads:</b></h5>
+<a href="https://mega.co.nz/#F!D5xxQCCA!PsCr5W1_5mBYBzIR5uvj9A">Mega</a>
+<a href="https://drive.google.com/folderview?id=0B91uVmaVElUhNTlOZlFTUGJhU3c&usp=sharing">Google Drive</a>
 
-<h3>How to compile</h3>
-- Download <a href="https://qt-project.org/downloads">Qt 5.2.0 or later</a>
-- Download the <a href="https://github.com/tux3/LoE-PrivateServer/archive/master.zip">latest Private Server source snapshot</a>
-- Extract zip archive with source snapshot into any desired directory
-- Open src\LoE_PrivateServer.pro in Qt
-- Press Ctrl+B (or Build button) to compile the project
+<h3>How to play</h3>
+- download <a href="https://mega.co.nz/#!a8oTiSyY!360FYB5iA7a0TNkjviVqxw-oBINxIyzY-i5O3USELy4">LoE -Yousei (PonyvilleFM stream).7z"</a>
+- extract to a directory of your choice
+- start loe.exe
+- In the game pick a name/password (no need to register first)
 
-<h4>How to compile a console version</h4>
-- Open src\LoE_PrivateServer.pro in Qt
-- Open <b>Projects</b> on the left sidebar
-- Under <i>Edit Build Configuration</i> click <b>Add->Clone Selected</b>
-- Name it something like <i>Console Release</i>
-- Under <i>Build Steps</i>, expand <b>qmake</b>
-- In <i>Additional Arguments</i>, paste the following: `CONFIG+=console_only`
-- Press Ctrl+B (or Build button) to compile the project
-
-<h3>How to use</h3>
-Extract in the Legends of Equestria folder, start PrivateServer.exe and the game. 
-In the game pick a name/password (no need to register first)
-Then use either :
-- the Local server, for singleplayer or a multiplayer LAN in your house
-- one of the Online servers, for multiplayer
-- You can also add your own servers in data/serversList.cfg
+<h3>update / patch existing Babscon 2014 client (for Mac & Linux)</h3>
+- download <a href="https://mega.co.nz/#!ipZlABRA!PM3P2KRXsTaQ0PXmvNhWavsvz4jxbBRTrzFOFFzurh8"> LoE - Yousei (patched dll).zip</a>
+- replace the existing dll in /Contents/Data/Managed/ with these
+- start the game
 
 <h3>Still in Beta</h3>
 The private server is still in beta, expect bugs. Patches and pull requests are welcome.<br/>
@@ -36,17 +25,12 @@ Some important features are still lacking at the moment :
 - Not as many quests as the official servers.
 - No 'natural' items to collect (flowers, gems, ...)
 
-<h3>Online private servers</h3>
-The servers are run by independant volunteers. <br/>Anyone can start a private server, and they are not all running the same version or following the same rules. <br/>By default there is no chat filtering or moderation, the cutie marks are the ones of the official servers, and the quests/npcs are the ones on this repository.<br/>But server owners are free to change this as they wish, and their servers might not always be 'safe for work'.
-You can find more informations on how to create/edit quests in the file QuestScript.txt.
-
 <h3>Chat commands</h3>
 - /stuck : Reloads and sends you to the spawn. Use it if you can't move.
-- unstuck me : Same than above.
-- :commands : Gives a list of chat commands
+- :help : Gives a list of chat commands
 - :roll : Roll a dice, result between 0 and 99
-- :msg player msg : Sends a private message to a player
-- :names : Lists of the players on the server and where they are
+- :w player msg : Sends a private message to a player
+- :players : Lists of the players on the server and where they are
 - :me action : States your current action
 - :tp location : Teleports your pony to this location (scene)
 
@@ -117,4 +101,21 @@ Notes (as of Babscon 2014 RC2):
 - Cottage has no textures nor visible sky box, and the warp points aren't working properly. Walking outside of window will cause you to fall into void
 - Tartarus was excluded from the game build. Accessing it will cause game to display loading screen indefinitely. The only way to get out is to delete your character entirely
 - PM-Lvl1 is the Pony Muncher game (Pac-Man clone) with unfinished functionality. You cannot escape it by normal means
-- If you land in the void after loading a scene, try "/stuck" in the chat (and either add an issue on GitHub or complain at barrdetwix@gmail.com)
+- If you land in the void after loading a scene, try "/stuck" in the chat
+- For bugs add an issue on GitHub
+
+<h3>How to compile</h3>
+- Download <a href="https://qt-project.org/downloads">Qt 5.2.0 or later</a>
+- Download the <a href="https://github.com/Yousei9/LoE-PrivateServer/archive/LoE-PrivateServer-Babscon.zip">latest Private Server source snapshot</a>
+- Extract zip archive with source snapshot into any desired directory
+- Open src\LoE_PrivateServer.pro in Qt
+- Press Ctrl+B (or Build button) to compile the project
+
+<h4>How to compile a console version</h4>
+- Open src\LoE_PrivateServer.pro in Qt
+- Open <b>Projects</b> on the left sidebar
+- Under <i>Edit Build Configuration</i> click <b>Add->Clone Selected</b>
+- Name it something like <i>Console Release</i>
+- Under <i>Build Steps</i>, expand <b>qmake</b>
+- In <i>Additional Arguments</i>, paste the following: `CONFIG+=console_only`
+- Press Ctrl+B (or Build button) to compile the project
