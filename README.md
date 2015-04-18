@@ -8,7 +8,7 @@ The official release is for Windows. The server should work on Linux and Mac too
 <a href="https://drive.google.com/folderview?id=0B91uVmaVElUhNTlOZlFTUGJhU3c&usp=sharing">Google Drive</a><br/>
 
 <h3>How to play</h3>
-- download <a href="https://mega.co.nz/#!a8oTiSyY!360FYB5iA7a0TNkjviVqxw-oBINxIyzY-i5O3USELy4">LoE -Yousei (PonyvilleFM stream).7z"</a>
+- download <a href="https://mega.co.nz/#!a8oTiSyY!360FYB5iA7a0TNkjviVqxw-oBINxIyzY-i5O3USELy4">LoE -Yousei (PonyvilleFM stream).7z</a>
 - extract to a directory of your choice
 - start loe.exe
 - In the game pick a name/password (no need to register first)
