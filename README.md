@@ -4,8 +4,8 @@ Legends of Equestria Private Server - Yousei
 This is an open source Private Server for the game Legends of Equestria, to play even when the official servers are closed.
 The official release is for Windows. The server should work on Linux and Mac too, but you'll need to patch the client yourself.<br/>
 <h5><b>All Dowloads:</b></h5>
-<a href="https://mega.co.nz/#F!D5xxQCCA!PsCr5W1_5mBYBzIR5uvj9A">Mega</a>
-<a href="https://drive.google.com/folderview?id=0B91uVmaVElUhNTlOZlFTUGJhU3c&usp=sharing">Google Drive</a>
+<a href="https://mega.co.nz/#F!D5xxQCCA!PsCr5W1_5mBYBzIR5uvj9A">Mega</a><br/>
+<a href="https://drive.google.com/folderview?id=0B91uVmaVElUhNTlOZlFTUGJhU3c&usp=sharing">Google Drive</a><br/>
 
 <h3>How to play</h3>
 - download <a href="https://mega.co.nz/#!a8oTiSyY!360FYB5iA7a0TNkjviVqxw-oBINxIyzY-i5O3USELy4">LoE -Yousei (PonyvilleFM stream).7z"</a>
