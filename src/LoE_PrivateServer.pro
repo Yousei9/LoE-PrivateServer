@@ -4,8 +4,11 @@
 #
 #-------------------------------------------------
 
-VERSION = 0.5.5
+TARGET = LoE_PrivateServer
+VERSION = 0.5.6
+
 QT       += core network
+TEMPLATE = app
 
 # build as a console application
 console_only {
@@ -23,8 +26,9 @@ else {
     DEFINES  += USE_GUI
 }
 
-TARGET = LoE_PrivateServer
-TEMPLATE = app
+
+DEFINES += APP_NAME=\\\"$${TARGET}\\\" \
+    APP_VERSION=\\\"$${VERSION}\\\"
 
 SOURCES += main.cpp \
     tcp.cpp \
@@ -59,6 +63,7 @@ SOURCES += main.cpp \
     appStartStopServer.cpp
 
 HEADERS  += \
+    build.h \
     message.h \
     utils.h \
     scene.h \

@@ -54,7 +54,7 @@ void sendEntitiesList(Player *player)
         //return;
     }
     else // Loading finished, sending entities list
-    logMessage(QObject::tr("UDP: Sending entities list to %1").arg(player->pony.netviewId));
+    logMessage(QObject::tr("UDP: Sending entities list to %1 (%2/%3)").arg(player->pony.netviewId).arg(player->name).arg(player->pony.name));
     Scene* scene = findScene(player->pony.sceneName); // Spawn all the players on the client
     for (int i=0; i<scene->players.size(); i++)
         sendNetviewInstantiate(&scene->players[i]->pony, player);
@@ -489,49 +489,18 @@ void sendPonyData(Pony *src, Player *dst)
     sendMessage(dst, MsgUserReliableOrdered18, data);
 }
 
-void sendLoadSceneRPC(Player* player, QString sceneName) // Loads a scene and send to the default spawn
+bool sendLoadSceneRPC(Player* player, QString sceneName) // Loads a scene and send to the default spawn
 {
-    logMessage(QObject::tr("UDP: Loading scene \"%1\" on %2").arg(sceneName).arg(player->pony.netviewId));
     Vortex vortex = findVortex(sceneName, 0);
     if (vortex.destName.isEmpty())
     {
-        logMessage(QObject::tr("UDP: Scene not in vortex DB. Aborting scene load."));
-        return;
+        logError(QObject::tr("UDP: Scene not in vortex DB. Aborting scene load."));
+        return false;
     }
-
-    Scene* scene = findScene(sceneName);
-    Scene* oldScene = findScene(player->pony.sceneName);
-    if (scene->name.isEmpty() || oldScene->name.isEmpty())
-    {
-        logMessage(QObject::tr("UDP: Can't find the scene, aborting"));
-        return;
-    }
-
-    // Update scene players
-    //app.logMessage("sendLoadSceneRPC: locking");
-    levelLoadMutex.lock();
-    player->inGame=1;
-    player->pony.pos = vortex.destPos;
-    player->pony.sceneName = sceneName.toLower();
-    player->lastValidReceivedAnimation.clear(); // Changing scenes resets animations
-    Player::removePlayer(oldScene->players, player->IP, player->port);
-    // Send remove RPC to the other players of the old scene
-    for (int i=0; i<oldScene->players.size(); i++)
-        sendNetviewRemove(oldScene->players[i], player->pony.netviewId);
-    // Send instantiate to the players of the new scene
-    for (int i=0; i<scene->players.size(); i++)
-        if (scene->players[i]->inGame>=2)
-            sendNetviewInstantiate(&player->pony, scene->players[i]);
-    scene->players << player;
-
-    QByteArray data(1,5);
-    data += stringToData(sceneName.toLower());
-    sendMessage(player,MsgUserReliableOrdered6,data); // Sends a 48
-    //app.logMessage("sendLoadSceneRPC: unlocking");
-    levelLoadMutex.unlock();
+    return sendLoadSceneRPC(player, sceneName, vortex.destPos);
 }
 
-void sendLoadSceneRPC(Player* player, QString sceneName, UVector pos) // Loads a scene and send to the given pos
+bool sendLoadSceneRPC(Player* player, QString sceneName, UVector pos) // Loads a scene and send to the given pos
 {
     logMessage(QString(QString("UDP: Loading scene \"%1\" to %2 at %3 %4 %5")
                            .arg(sceneName).arg(player->pony.netviewId)
@@ -541,14 +510,14 @@ void sendLoadSceneRPC(Player* player, QString sceneName, UVector pos) // Loads a
     Scene* oldScene = findScene(player->pony.sceneName);
     if (scene->name.isEmpty() || oldScene->name.isEmpty())
     {
-        logMessage(QObject::tr("UDP: Can't find the scene, aborting"));
-        return;
+        logError(QObject::tr("UDP: Can't find scene %1, aborting").arg(sceneName));
+        return false;
     }
 
     // Update scene players
     //app.logMessage("sendLoadSceneRPC pos: locking");
     levelLoadMutex.lock();
-    player->inGame=1;
+    player->inGame = 1;
     player->pony.pos = pos;
     player->pony.sceneName = sceneName.toLower();
     player->lastValidReceivedAnimation.clear(); // Changing scenes resets animations
@@ -557,9 +526,11 @@ void sendLoadSceneRPC(Player* player, QString sceneName, UVector pos) // Loads a
     for (int i=0; i<oldScene->players.size(); i++)
         sendNetviewRemove(oldScene->players[i], player->pony.netviewId);
     // Send instantiate to the players of the new scene
-    for (int i=0; i<scene->players.size(); i++)
-        if (scene->players[i]->inGame>=2)
+    for (int i=0; i < scene->players.size(); i++)
+    {
+        if (scene->players[i]->inGame >= 2)
             sendNetviewInstantiate(&player->pony, scene->players[i]);
+    }
     scene->players << player;
 
     QByteArray data(1,5);
@@ -567,6 +538,46 @@ void sendLoadSceneRPC(Player* player, QString sceneName, UVector pos) // Loads a
     sendMessage(player,MsgUserReliableOrdered6,data); // Sends a 48
     //app.logMessage("sendLoadSceneRPC pos: unlocking");
     levelLoadMutex.unlock();
+    return true;
+}
+
+void sendChannelMessage(Player* player, qint8 channel, QString message, QString author)
+{
+   if (channel==ChatLocal)
+   {
+       Scene* scene = findScene(player->pony.sceneName);
+       if (scene->name.isEmpty())
+           logError(QObject::tr("UDP: Can't find the scene for chat message, aborting"));
+       else
+       {
+           for (int i=0; i<scene->players.size(); i++)
+           {
+               if (scene->players[i]->inGame>=2)
+               {
+                   sendChatMessage(scene->players[i], message, author, ChatLocal);
+               }
+           }
+       }
+   }
+   else if(channel==ChatGeneral || channel==ChatGuild || channel==ChatParty) // TODO: add party, herd handling
+   {
+       for (int i=0; i<Player::udpPlayers.size(); i++)
+       {
+           if (Player::udpPlayers[i]->inGame>=1)
+           {
+               sendChatMessage(Player::udpPlayers[i], message, author, channel);
+           }
+       }
+   }
+}
+
+void sendChatBroadcast(Player* player, QString message, QString author)
+{
+    sendChatMessage(player, message, author, ChatGeneral);
+    sendChatMessage(player, message, author, ChatLocal);
+    sendChatMessage(player, message, author, ChatParty);
+    sendChatMessage(player, message, author, ChatGuild);
+    sendChatMessage(player, message, author, ChatWhisper);
 }
 
 void sendChatMessage(Player* player, QString message, QString author, quint8 chatType)
@@ -583,7 +594,6 @@ void sendChatMessage(Player* player, QString message, QString author, quint8 cha
     data += stringToData(author);
     data += stringToData(message);
     data += idAndAccess;
-
     sendMessage(player,MsgUserReliableOrdered4,data); // Sends a 46
 }
 

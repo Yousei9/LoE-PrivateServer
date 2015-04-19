@@ -82,8 +82,10 @@ void sendInventoryRPC(Player* player, QList<InventoryItem>& inv, QList<WearableI
 void sendInventoryRPC(Player* player);
 void sendSetBitsRPC(Player* player); // Resend how many bits we have to the clients
 void sendSkillsRPC(Player* player, QList<QPair<quint32, quint32> >& skills);
-void sendLoadSceneRPC(Player* player, QString sceneName);
-void sendLoadSceneRPC(Player* player, QString sceneName, UVector pos);
+bool sendLoadSceneRPC(Player* player, QString sceneName);
+bool sendLoadSceneRPC(Player* player, QString sceneName, UVector pos);
+void sendChannelMessage(Player* player, qint8 channel, QString message, QString author);
+void sendChatBroadcast(Player* player, QString message, QString author);
 void sendChatMessage(Player* player, QString message, QString author, quint8 chatType);
 void sendMove(Player* player, float x, float y, float z);
 void sendBeginDialog(Player* player);

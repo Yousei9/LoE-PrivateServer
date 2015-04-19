@@ -14,7 +14,8 @@ Mob::Mob(Mobzone* zone)
     sceneName = zone->sceneName;
 
     id = SceneEntity::getNewId();
-    netviewId = SceneEntity::getNewNetviewId();
+    netviewId = id;
+    //netviewId = SceneEntity::getNewNetviewId();
 
     pos = getRandomPos(zone);
 

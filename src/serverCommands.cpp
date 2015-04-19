@@ -297,7 +297,7 @@ void App::sendCmdLine()
                                +" / "+Player::udpPlayers[i]->pony.name
                                +"   "+Player::udpPlayers[i]->IP
                                +":"+QString().setNum(Player::udpPlayers[i]->port)
-                               +"   "+QString().setNum((int)timestampNow()-Player::udpPlayers[i]->lastPingTime)+"s");
+                               +"   "+QString().number(timestampNow()-Player::udpPlayers[i]->lastPingTime, 'f', 3)+"s");
             return;
         }
         str = str.right(str.size()-10);

@@ -1,5 +1,6 @@
 #include "sync.h"
 #include "scene.h"
+#include "log.h"
 #include "message.h"
 #include "utils.h"
 #include "serialize.h"
@@ -22,17 +23,24 @@ void Sync::stopSync()
 
 void Sync::doSync()
 {
-    for (int i=0; i<Scene::scenes.size(); i++)
+   for (int i=0; i<Scene::scenes.size(); i++)
     {
         if (Scene::scenes[i].players.size()<2)
             continue;
+        //logMessage("Syncing "+ QString().setNum(Scene::scenes[i].players.size()) +" players in scene "+ Scene::scenes[i].name);
         for (int j=0; j<Scene::scenes[i].players.size(); j++)
+        {
             for (int k=0; k<Scene::scenes[i].players.size(); k++)
             {
-                if (j==k)
-                    continue;
-                sendSyncMessage(Scene::scenes[i].players[j], Scene::scenes[i].players[k]);
+                if (j!=k)
+                {
+                    // sending sync to self before before sync: no client updates positions
+                    // sending sync to self after sync: clients usync correctly across all players (tested with 2-5 ponies)
+                    sendSyncMessage(Scene::scenes[i].players[j], Scene::scenes[i].players[k]);
+                    sendSyncMessage(Scene::scenes[i].players[k], Scene::scenes[i].players[k]);
+                }
             }
+        }
     }
 }
 
@@ -48,12 +56,12 @@ void Sync::sendSyncMessage(Player* source, Player* dest)
     data += floatToData(source->pony.pos.x);
     data += floatToData(source->pony.pos.y);
     data += floatToData(source->pony.pos.z);
-    //data += rangedSingleToData(source.pony.rot.x, ROTMIN, ROTMAX, RotRSSize);
     data += rangedSingleToData(source->pony.rot.y, ROTMIN, ROTMAX, RotRSSize);
-    //data += rangedSingleToData(source.pony.rot.z, ROTMIN, ROTMAX, RotRSSize);
+//    data += rangedSingleToData(source->pony.rot.x, ROTMIN, ROTMAX, RotRSSize);
+//    data += rangedSingleToData(source->pony.rot.z, ROTMIN, ROTMAX, RotRSSize);
     sendMessage(dest, MsgUserUnreliable, data);
 
-    //app.logMessage("UDP: Syncing "+QString().setNum(source->pony.netviewId)+" to "+QString().setNum(dest->pony.netviewId));
+    //logMessage(QObject::tr("UDP: Syncing %1 to %2").arg(source->pony.netviewId).arg(dest->pony.netviewId));
 }
 // TODO: Test ranged singles on PonyVille with the bounds from the text assets
 // Or maybe test the command that gives the bounds to the clients

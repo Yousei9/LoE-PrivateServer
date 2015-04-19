@@ -439,7 +439,7 @@ bool Pony::tryWearItem(quint8 invSlot)
             itemSlots = wearablePositionsMap[id];
             if (wornSlots & itemSlots)
             {
-                logMessage(QObject::tr("Can't wear item : slots occupied"));
+                //logMessage(QObject::tr("Can't wear item : slots occupied"));
                 return false;
             }
 
@@ -453,7 +453,7 @@ bool Pony::tryWearItem(quint8 invSlot)
     }
     if (id == (uint32_t)-1)
     {
-        logMessage(QObject::tr("Index not found"));
+        logError(QObject::tr("Index %1 not found").arg(id));
         return false;
     }
     wornSlots |= itemSlots;
@@ -467,7 +467,7 @@ bool Pony::tryWearItem(quint8 invSlot)
 
     Scene* scene = findScene(sceneName);
     if (scene->name.isEmpty())
-        logMessage(QObject::tr("UDP: Can't find the scene for wearItem RPC, aborting"));
+        logError(QObject::tr("UDP: Can't find the scene for wearItem RPC, aborting"));
     else
     {
         for (Player* dest : scene->players)

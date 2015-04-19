@@ -29,8 +29,6 @@
 #include "CoreFoundation/CoreFoundation.h"
 #endif
 
-#define VERSIONSTRING "v0.5.5"
-
 #define GAMEDATAPATH "data/data/"
 #define PLAYERSPATH "data/players/"
 #define NETDATAPATH "data/netData/"

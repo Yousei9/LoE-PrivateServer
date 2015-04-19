@@ -192,7 +192,9 @@ void App::tcpProcessPendingDatagrams()
                     // Other GETs (not getlog)
                     data = removeHTTPHeader(data, "POST ");
                     data = removeHTTPHeader(data, "GET ");
+#if DEBUG_LOG
                     logMessage(tr("TCP: Replying to HTTP GET %1").arg(path));
+#endif
                     QFile head(QString(NETDATAPATH)+"/dataHeader.bin");
                     QFile res("data/"+path);
                     head.open(QIODevice::ReadOnly);
@@ -204,7 +206,7 @@ void App::tcpProcessPendingDatagrams()
                     res.open(QIODevice::ReadOnly);
                     if (!res.isOpen())
                     {
-                        logError(tr("TCP: File not found"));
+                        logError(tr("TCP: File not found %1").arg(path));
                         head.close();
                         // If we 404, we send a 304 Not Modified, and the client will use it's local version
                         // The game clients chokes if we send anything but a 200 or 304 back

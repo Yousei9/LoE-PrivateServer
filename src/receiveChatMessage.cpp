@@ -8,159 +8,214 @@
 
 void receiveChatMessage(QByteArray msg, Player* player)
 {
-    QString txt = dataToString(msg.mid(7));
     QString author = player->pony.name;
-    //logMessage("Chat "+author+":"+txt);
+    quint8 channel = (quint8)msg[6];
+    int msgIndex = 7;
+    quint8 msgLength = (quint8)msg[msgIndex];
+    QStringList messages;
 
-    if (txt.startsWith("/stuck") || txt.startsWith("unstuck me"))
+    // grab all messages
+    while(msgLength > 0)
+    {
+        messages << dataToString(msg.mid(msgIndex, msgLength+1));
+        msgIndex = msgIndex+msgLength+1;
+        msgLength = (quint8)msg[msgIndex];
+        //logMessage(QObject::tr("msgIndex:%1 msgLength:%2 msg.Size:%3").arg(msgIndex).arg(msgLength).arg(msg.size()));
+    }
+
+//    for (int i=0;i < messages.size();i++)
+//    {
+//        logMessage(QObject::tr("message[%1/%2]: %3").arg(i).arg(messages.size()).arg(messages[i]));
+//    }
+
+    if (messages[0].startsWith("/stuck") || messages[0].startsWith("unstuck me")) // "/stuck" is sent as "unstuck me" from client
     {
         sendLoadSceneRPC(player, player->pony.sceneName);
+        return;
     }
-    else if (txt == ":anhero")
-    {
-        QTimer *anheroTimer = new QTimer();
-        anheroTimer->setSingleShot(true);
 
-        QString deadPlayerName = player->name;
+    if (messages[0].startsWith(":commands") || messages[0].startsWith(":help"))  // "/help" is handled by the client
+    {
+        sendChatMessage(player, QString("<span color=\"yellow\">List of additional Commands:</span><br />")
+                        +QString("<em>:players</em><br /><span color=\"yellow\">Lists all players on the server</span><br />")
+                        +QString("<em>:w player message</em><br /><span color=\"yellow\">Sends a private message to a player</span><br />")
+                        +QString("<em>:me action</em><br /><span color=\"yellow\">States your current action</span><br />")
+                        +QString("<em>:tp location</em><br /><span color=\"yellow\">Teleports your pony to the specified region</span><br />")
+                        +QString("<em>:roll</em><br /><span color=\"yellow\">Rolls a random number between 00 and 99</span>"), "[Server]", channel);
+        return;
+    }
 
-        QObject::connect(anheroTimer, &QTimer::timeout, [=]() {
-            // Find player again instead of reusing pointer, in case they disconnect
-            Player* deadPlayer = Player::findPlayer(Player::udpPlayers, deadPlayerName);
-            if (deadPlayer->connected && deadPlayer->pony.dead) {
-                sendSetStatRPC(deadPlayer, 1, deadPlayer->pony.health);
-                Scene* scene = findScene(deadPlayer->pony.sceneName);
-                for (Player* other : scene->players)
-                    sendNetviewInstantiate(&deadPlayer->pony, other);
-                deadPlayer->pony.dead = false;
-            }
-            delete anheroTimer;
-            // Don't delete deadPlayer here. That kills the player's session
-          } );
-        if (!player->pony.dead)
-        {
-            player->pony.dead = true;
-            sendSetStatRPC(player, 1, 0);
-            anheroTimer->start(5000);
-            Scene* scene = findScene(player->pony.sceneName);
-            for (Player* other : scene->players)
-                sendNetviewRemove(other, player->pony.netviewId, NetviewRemoveReasonKill);
-        }
-    }
-    else if (txt == ":commands")
-    {
-        sendChatMessage(player, "<span color=\"yellow\">List of Commands:</span><br /><em>:roll</em><br /><span color=\"yellow\">Rolls a random number between 00 and 99</span><br /><em>:msg player message</em><br /><span color=\"yellow\">Sends a private message to a player</span><br /><em>:names</em><br /><span color=\"yellow\">Lists all players on the server</span><br /><em>:me action</em><br /><span color=\"yellow\">States your current action</span><br /><em>:tp location</em><br /><span color=\"yellow\">Teleports your pony to the specified region</span>", "[Server]", ChatLocal);
-    }
-    else if (txt.startsWith(":msg"))
-    {
-        if(txt.count(" ") < 2)
-            sendChatMessage(player, ":msg<br /><span color=\"yellow\">Usage:</span><br /><em>:msg player message</em><br /><span color=\"yellow\">Player names are case-insensitive, ignore spaces and you do not need to type out their full name.</span>", author, ChatLocal);
-        else
-        {
-            for (int i=0; i<Player::udpPlayers.size(); i++)
-            {
-                if (Player::udpPlayers[i]->inGame>=2 && Player::udpPlayers[i]->pony.name.toLower().remove(" ")
-                        .startsWith(txt.toLower().section(" ", 1, 1)))
-                {
-                    txt = txt.remove(0, txt.indexOf(" ", 5) + 1);
-                    sendChatMessage(Player::udpPlayers[i], "<span color=\"yellow\">[PM] </span>" + txt, author, ChatLocal);
-                    sendChatMessage(player, "<span color=\"yellow\">[PM to "
-                                    + Player::udpPlayers[i]->pony.name + "] </span>" + txt, author, ChatLocal);
-                }
-            }
-        }
-    }
-    else if (txt.startsWith(":names"))
+    // list all players in all instances
+    if (messages[0].startsWith(":players"))
     {
         QString namesmsg = "<span color=\"yellow\">Players currently in game:</span>";
 
         for (int i=0; i<Player::udpPlayers.size(); i++)
-            if (Player::udpPlayers[i]->inGame>=2)
+            if (Player::udpPlayers[i]->inGame>=1)
                 namesmsg += "<br />#b" + Player::udpPlayers[i]->pony.name
                         + "#b<br /><span color=\"yellow\"> - in "
                         + Player::udpPlayers[i]->pony.sceneName + "</span>";
 
-        sendChatMessage(player, namesmsg, "[Server]", ChatLocal);
+        sendChatMessage(player, namesmsg, "[Server]", channel);
+        return;
     }
-    else if (txt.startsWith(":tp"))
+
+    // allow players to teleport to any scene
+    if (messages[0].startsWith(":tp"))
     {
-        if (txt.count(" ") < 1)
+        if (messages[0].count(" ") < 1)
         {
           QString msgtosend = ":tp<br /><span color=\"yellow\">Usage:</span><br /><em>:tp location</em><br /><span color=\"yellow\">Available locations:</span><em>";
 
             for (int i=0; i<Scene::scenes.size(); i++)
                 msgtosend += "<br />" + Scene::scenes[i].name;
 
-            sendChatMessage(player, msgtosend + "</em>", author, ChatLocal);
+            sendChatMessage(player, msgtosend + "</em>", author, channel);
+        }
+        else
+        {
+            QString scene = messages[0].remove(0, 4);
+
+            if (sendLoadSceneRPC(player, scene))
+            {
+                sendChatMessage(player, QObject::tr("<span color=\"yellow\">teleporting to %1</span>").arg(scene), "[Server]", channel); //show our command to us
+            }
+            else
+            {
+                sendChatMessage(player, QObject::tr("<span color=\"yellow\">teleporting to %1 failed</span>").arg(scene), "[Server]", channel); //show our command to us
+            }
+        }
+        return;
+    }
+
+    // advanced whisper :w
+    if (messages[0].startsWith(":w"))
+    {
+        if(messages[0].count(" ") < 2)
+        {
+            sendChatMessage(player, ":w<br /><span color=\"yellow\">Usage:</span><br /><em>:w player message</em><br /><span color=\"yellow\">Player names are case-insensitive, ignore spaces and you do not need to type out their full name.</span>", author, channel);
+            return;
         }
 
-        else
-            sendLoadSceneRPC(player, txt.remove(0, 4));
+        QString recipient = "";
+        QString recipientsFound = "";
+
+        if (messages[0].count("\"") >= 2) // search for exact match
+        {
+            recipient = messages[0].section("\"", 1, 1);
+            QString message = messages[0].section("\"",2);
+
+            if (message.isEmpty() || recipient.length() < 3) return;
+
+            for (int i=0; i<Player::udpPlayers.size(); i++)
+            {
+                if (Player::udpPlayers[i]->inGame>=1 &&
+                    Player::udpPlayers[i]->pony.name == recipient )
+                {
+                    // until we can make whisper chat get update notice send it to all tabs
+                    sendChatBroadcast(player, message, "to " + Player::udpPlayers[i]->pony.name); // show in own messages
+                    sendChatBroadcast(Player::udpPlayers[i], message, author); // show in recipients messages
+                    recipientsFound += Player::udpPlayers[i]->pony.name +",";
+                }
+            }
+        }
+        else //use best match
+        {
+            recipient = messages[0].section(" ", 1, 1).toLower();
+            QString message = messages[0].section(" ",2);
+
+            if (message.isEmpty() || recipient.length() < 3) return;
+
+            for (int i=0; i<Player::udpPlayers.size(); i++)
+            {
+                if (Player::udpPlayers[i]->inGame>=1 &&
+                    Player::udpPlayers[i]->pony.name.toLower().remove(" ").startsWith(recipient))
+                {
+                    // until we can make whisper chat get update notice send it to all tabs
+                    sendChatBroadcast(player, message, "to " + Player::udpPlayers[i]->pony.name); // show in own messages
+                    sendChatBroadcast(Player::udpPlayers[i], message, author); // show in recipients messages
+                    recipientsFound += Player::udpPlayers[i]->pony.name +",";
+                }
+            }
+        }
+
+        if (recipientsFound.count(",") < 1)
+            sendChatBroadcast(player, QString("<span color=\"yellow\">player %1 not found</span>").arg(recipient), "[Server]");
+
+        return;
     }
-    else if (txt == ":me")
+
+    // normal whisper /w
+    if (channel == ChatWhisper && messages.size() == 2)
     {
-        sendChatMessage(player, ":me<br /><span color=\"yellow\">Usage:</span><br /><em>:me action</em>", author, ChatLocal);
+        if (messages[0].length() < 3 || messages[1].length() < 3)
+            return;
+
+        QString recipientsFound = "";
+        for (int i=0; i<Player::udpPlayers.size(); i++)
+        {
+            if (Player::udpPlayers[i]->inGame>=1 &&
+                Player::udpPlayers[i]->pony.name.toLower().remove(" ").startsWith(messages[0].toLower()))
+            {
+                // until we can make whisper chat get update notice send it to all tabs
+                sendChatBroadcast(player, messages[1], "to " + Player::udpPlayers[i]->pony.name); // show in own messages
+                sendChatBroadcast(Player::udpPlayers[i], messages[1], author); // show in recipients messages
+                recipientsFound += Player::udpPlayers[i]->pony.name +",";
+            }
+        }
+
+        if (recipientsFound.count(",") < 1)
+            sendChatBroadcast(player, QString("<span color=\"yellow\">player %1 not found</span>").arg(messages[0]), "[Server]");
+
+        return;
     }
-    else // Broadcast the message
+
+    // broadcast chat emote in current channel
+    if (messages[0].startsWith(":me"))
+    {
+        if (messages[0].count(" ") < 1)
+                sendChatMessage(player, ":me<br /><span color=\"yellow\">Usage:</span><br /><em>:me action</em>", author, ChatLocal);
+        else
+        {
+            messages[0].remove(0, 3);
+            messages[0] = "<em>#b* " + author + "#b" + messages[0] + "</em>";
+            sendChannelMessage(player, channel, messages[0], "");
+        }
+        return;
+    }
+
+    // roll a dice
+    if (messages[0].startsWith(":roll"))
     {
         int rollnum = -1;
         QString rollstr;
-        bool actmsg = false;
 
-        if (txt == ":roll")
+        if (player->chatRollCooldownEnd < QDateTime::currentDateTime())
         {
-            if (player->chatRollCooldownEnd < QDateTime::currentDateTime())
-            {
-                rollnum = qrand() % 100;
-                rollstr.sprintf("<span color=\"yellow\">#b%s#b rolls %02d</span>", author.toLocal8Bit().data(), rollnum);
-                player->chatRollCooldownEnd = QDateTime::currentDateTime().addSecs(10);
-            }
+           rollnum = qrand() % 100;
+           rollstr.sprintf("<span color=\"yellow\">#b%s#b rolls %02d</span>", author.toLocal8Bit().data(), rollnum);
+           player->chatRollCooldownEnd = QDateTime::currentDateTime().addSecs(10);
+           sendChannelMessage(player, channel, rollstr, "[Server]");
         }
-        if (txt.startsWith(":me "))
+        return;
+    }
+
+    // Broadcast the message in current channel
+    if (messages[0].length() > 0)
+    {
+        if (messages[0].startsWith(">>")) // temp gm broadcast
         {
-            actmsg = true;
-            txt.remove(0, 3);
-            txt = "<em>#b* " + author + "#b" + txt + "</em>";
-        }
-        if ((quint8)msg[6] == 8) // Local chat only
-        {
-            Scene* scene = findScene(player->pony.sceneName);
-            if (scene->name.isEmpty())
-                logMessage(QObject::tr("UDP: Can't find the scene for chat message, aborting"));
-            else
-            {
-                for (int i=0; i<scene->players.size(); i++)
-                {
-                    if (scene->players[i]->inGame>=2)
-                    {
-                        if (rollnum > -1)
-                            sendChatMessage(scene->players[i], rollstr, "[Server]", ChatLocal);
-                        else if (actmsg)
-                            sendChatMessage(scene->players[i], txt, "", ChatLocal);
-                        else if (txt.startsWith(">"))
-                            sendChatMessage(scene->players[i], "<span color=\"green\">" + txt + "</span>", author, ChatLocal);
-                        else
-                            sendChatMessage(scene->players[i], txt, author, ChatLocal);
-                    }
-                }
-            }
-        }
-        else // Send globally
-        {
+            messages[0].remove(0, 2);
+            messages[0] = "#b<span color=\"red\">" + messages[0] + "</span>";
             for (int i=0; i<Player::udpPlayers.size(); i++)
             {
-                if (Player::udpPlayers[i]->inGame>=2)
+                if (Player::udpPlayers[i]->inGame>=1)
                 {
-                    if (rollnum > -1)
-                        sendChatMessage(Player::udpPlayers[i], rollstr, "[Server]", ChatGeneral);
-                    else if (actmsg)
-                        sendChatMessage(Player::udpPlayers[i], txt, "", ChatGeneral);
-                    else if (txt.startsWith(">"))
-                        sendChatMessage(Player::udpPlayers[i], "<span color=\"green\">" + txt + "</span>", author, ChatGeneral);
-                    else
-                        sendChatMessage(Player::udpPlayers[i], txt, author, ChatGeneral);
-
+                    sendChatBroadcast(Player::udpPlayers[i], messages[0], author);
                 }
             }
         }
+        else
+            sendChannelMessage(player, channel, messages[0], author);
     }
 }

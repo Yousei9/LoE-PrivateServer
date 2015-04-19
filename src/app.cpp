@@ -191,7 +191,7 @@ void App::on_saveLogButton_clicked()
     }
     else
     {
-        logMessage(tr("Failed to open log file '%1' for saving").arg(logFilename));
+        logError(tr("Failed to open log file '%1' for saving").arg(logFilename));
         return;
     }
 }

@@ -1,4 +1,5 @@
 #include "app.h"
+#include "build.h"
 #include "skillparser.h"
 #include "mobsParser.h"
 #include "animationparser.h"
@@ -32,7 +33,7 @@ void App::startup()
     ui->retranslateUi(this);
 #endif
 
-    logStatusMessage(tr("Private server")+" "+VERSIONSTRING);
+    logStatusMessage(QString("%1 v%2.%3").arg(APP_NAME).arg(APP_VERSION).arg(BUILD));
 
     app.loginServerUp = false;
     app.gameServerUp = false;
@@ -60,8 +61,8 @@ void App::startup()
     app.ui->gamePort->setText(QString::number(gamePort));
     int connectedPlayers = Player::udpPlayers.length();
     app.ui->userCountLabel->setText(QString("%1 / %2").arg(connectedPlayers).arg(maxConnected));
-    app.ui->builddateLabel->setText(tr("Built %1").arg(__DATE__));
-    app.ui->versionLabel->setText(VERSIONSTRING);
+    app.ui->builddateLabel->setText(tr("Built %1").arg(BUILDDATE));
+    app.ui->versionLabel->setText(QString("v%1<font size=14pt>.%2</font>").arg(APP_VERSION).arg(BUILD));
 
     connect(app.ui->sendButton, SIGNAL(clicked()), this, SLOT(sendCmdLine()));
     connect(app.ui->cmdLine, SIGNAL(returnPressed()), this, SLOT(sendCmdLine()));
@@ -94,8 +95,8 @@ void App::startup()
     }
 
     /// Example Stuff
-    logMessage("");
-    app.printBasicHelp();
+    //logMessage("");
+    //app.printBasicHelp();
 
     if (autostartClient)
     {
@@ -574,15 +575,15 @@ void App::startGameClient()
         }
         else
         {
-            logMessage("Couldn't start game.");
+            logError("Couldn't start game.");
         }
     }
     else
     {
-        logMessage(tr("Game executable '%1' not found.").arg(clientPath));
+        logError(tr("Game executable '%1' not found.").arg(clientPath));
     }
 #else
     //TODO: start client in non win enviroment
-    logMessage("Game start not implemented on this platform.");
+    logError("Game start not implemented on this platform.");
 #endif
 }

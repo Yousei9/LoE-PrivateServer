@@ -110,11 +110,11 @@ void onAckReceived(QByteArray msg, Player* player)
                 player->udpSendReliableQueue.remove(0); // The whole grouped msg was ACK'd, remove it
                 if (player->udpSendReliableQueue.size()) // If there's a next message in the queue, send it
                 {
-                    logMessage(QObject::tr("UDP: Sending next message in queue"));
+                    logMessage(QObject::tr("UDP: Sending next message to %1").arg(player->pony.netviewId));
                     qMsg = player->udpSendReliableQueue[0];
                     if (udpSocket->writeDatagram(qMsg,QHostAddress(player->IP),player->port) != qMsg.size())
                     {
-                        logError(QObject::tr("UDP: Error sending last message"));
+                        logError(QObject::tr("UDP: Error sending last message to %1").arg(player->pony.netviewId));
                         restartUdpServer();
                     }
                     player->udpSendReliableTimer->start();
