@@ -9,6 +9,7 @@ LoE - Ohayocon 2014 - Windows x64_fixed/
 LoE-Windows_86 2014 Babscon RC1/
 LoE-Windows_64 2014 Babscon RC2/
 LoE-Windows_32-2014-08-06-rc2/
+data/server.ini
 
 # Release files
 PrivateServ-linux-x86/
@@ -48,4 +49,3 @@ moreInfos/wiki
 # Archives
 *.zip
 *.7z
-data/server.ini
