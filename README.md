@@ -11,7 +11,8 @@ The official release is for Windows. The server should work on Linux and Mac too
 - download <a href="https://mega.co.nz/#!a8oTiSyY!360FYB5iA7a0TNkjviVqxw-oBINxIyzY-i5O3USELy4">LoE -Yousei (PonyvilleFM stream).7z</a>
 - extract to a directory of your choice
 - start loe.exe
-- In the game pick a name/password (no need to register first)
+- In the game pick a name/password (no need to register first)<br/>
+  <b>username and password may only be alphanumeric</b>
 
 <h3>update / patch existing Babscon 2014 client (for Mac & Linux)</h3>
 - download <a href="https://mega.co.nz/#!ipZlABRA!PM3P2KRXsTaQ0PXmvNhWavsvz4jxbBRTrzFOFFzurh8"> LoE - Yousei (patched dll).zip</a>
