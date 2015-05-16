@@ -19,9 +19,17 @@ The official release is for Windows. The server should work on Linux and Mac too
 - replace the existing dll in /Contents/Data/Managed/ with these
 - start the game
 
-<h3>Still in Beta</h3>
+<h3>known Bugs</h3>
 The private server is still in beta, expect bugs. Patches and pull requests are welcome.<br/>
-Some important features are still lacking at the moment :
+- client hangs at loading items ... Error or loading Atlas ... Done:<br/>
+  Windows: delete data folder under "C:\users\%username%\AppData\Locallow\LoE\Legends of Equestria"<br/>
+  OSX: oen terminal and enter "rm -r library\caches/unity.LoE.Legends\ of\ Equestria/data"
+- others will see you standing on water rather than swimming
+- spawning below ground: <br/>
+  restart client to fix
+
+Some important features are still lacking at the moment:
+- no friend or herd system
 - Almost no monsters, and none of them can fight.
 - Not as many quests as the official servers.
 - No 'natural' items to collect (flowers, gems, ...)
