@@ -23,7 +23,7 @@ The official release is for Windows. The server should work on Linux and Mac too
 The private server is still in beta, expect bugs. Patches and pull requests are welcome.<br/>
 - client hangs at loading items ... Error or loading Atlas ... Done:<br/>
   Windows: delete data folder under "C:\users\%username%\AppData\Locallow\LoE\Legends of Equestria"<br/>
-  OSX: oen terminal and enter "rm -r library\caches/unity.LoE.Legends\ of\ Equestria/data"
+  OSX: open terminal and enter "rm -r library/caches/unity.LoE.Legends\ of\ Equestria/data"
 - others will see you standing on water rather than swimming
 - spawning below ground: <br/>
   restart client to fix
