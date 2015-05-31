@@ -11,16 +11,25 @@ The official release is for Windows. The server should work on Linux and Mac too
 - download <a href="https://mega.co.nz/#!a8oTiSyY!360FYB5iA7a0TNkjviVqxw-oBINxIyzY-i5O3USELy4">LoE -Yousei (PonyvilleFM stream).7z</a>
 - extract to a directory of your choice
 - start loe.exe
-- In the game pick a name/password (no need to register first)
+- In the game pick a name/password (no need to register first)<br/>
+  <b>username and password may only be alphanumeric</b>
 
 <h3>update / patch existing Babscon 2014 client (for Mac & Linux)</h3>
 - download <a href="https://mega.co.nz/#!ipZlABRA!PM3P2KRXsTaQ0PXmvNhWavsvz4jxbBRTrzFOFFzurh8"> LoE - Yousei (patched dll).zip</a>
 - replace the existing dll in /Contents/Data/Managed/ with these
 - start the game
 
-<h3>Still in Beta</h3>
+<h3>known Bugs</h3>
 The private server is still in beta, expect bugs. Patches and pull requests are welcome.<br/>
-Some important features are still lacking at the moment :
+- client hangs at loading items ... Error or loading Atlas ... Done:<br/>
+  Windows: delete data folder under "C:\users\%username%\AppData\Locallow\LoE\Legends of Equestria"<br/>
+  OSX: open terminal and enter "rm -r library/caches/unity.LoE.Legends\ of\ Equestria/data"
+- others will see you standing on water rather than swimming
+- spawning below ground: <br/>
+  restart client to fix
+
+Some important features are still lacking at the moment:
+- no friend or herd system
 - Almost no monsters, and none of them can fight.
 - Not as many quests as the official servers.
 - No 'natural' items to collect (flowers, gems, ...)
