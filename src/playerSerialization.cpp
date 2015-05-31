@@ -25,6 +25,7 @@ bool Player::savePlayers(QList<Player*>& playersData)
         if (i+1!=playersData.size())
             playersFile.write("\n");
     }
+    playersFile.close();
     return true;
 }
 
@@ -77,13 +78,22 @@ void Player::savePonies(Player *player, QList<Pony> ponies)
     playerPath.mkdir(player->name.toLatin1());
 
     QFile file(QDir::currentPath()+"/data/players/"+player->name.toLatin1()+"/ponies.dat");
-    file.open(QIODevice::ReadWrite | QIODevice::Truncate);
+
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Truncate))
+    {
+        logError(QObject::tr("Error saving ponies for %1 (%2)").arg(player->pony.netviewId).arg(player->name));
+        return;
+    }
+
     for (int i=0; i<ponies.size(); i++)
     {
         file.write(ponies[i].ponyData);
         file.write(vectorToData(ponies[i].pos));
-        file.write(stringToData(ponies[i].sceneName.toLower()));
+        file.write(stringToData(ponies[i].sceneName.toLower()));        
     }
+
+    file.close();
+
 }
 
 QList<Pony> Player::loadPonies(Player* player)
@@ -151,9 +161,9 @@ QList<Pony> Player::loadPonies(Player* player)
     return ponies;
 }
 
-void Pony::saveQuests()
+void Pony::saveQuests(QList<QString> ponyNames)
 {
-    logMessage(QObject::tr("UDP: Saving quests for %1 (%2)").arg(netviewId).arg(owner->name));
+    logMessage(QObject::tr("UDP: Saving quests for %1 (%2)").arg(owner->name).arg(this->name));
 
     QDir playerPath(QDir::currentPath());
     playerPath.cd("data");
@@ -163,7 +173,7 @@ void Pony::saveQuests()
     QFile file(QDir::currentPath()+"/data/players/"+owner->name.toLatin1()+"/quests.dat");
     if (!file.open(QIODevice::ReadWrite))
     {
-        logError(QObject::tr("Error saving quests for %1 (%2)").arg(netviewId).arg(owner->name));
+        logError(QObject::tr("Error saving quests for %1 (%2)").arg(owner->name).arg(this->name));
         return;
     }
     QByteArray questData = file.readAll();
@@ -177,10 +187,10 @@ void Pony::saveQuests()
         //app.logMessage("saveQuests : Reading entry "+entryName);
 
         quint16 entryDataSize = 4 * dataToUint16(questData.mid(i+nameSize));
-        if (entryName == this->name) // Delete the entry, we'll rewrite it at the end
+        if (entryName == this->name || !ponyNames.contains(entryName)) // Delete the entry, we'll rewrite it at the end
         {
+            //logMessage(QObject::tr("saveQuests: Removing pony %1").arg(entryName));
             questData.remove(i,nameSize+entryDataSize+2);
-            break;
         }
         else
             i += nameSize+entryDataSize+2;
@@ -205,7 +215,7 @@ void Pony::saveQuests()
 
 void Pony::loadQuests()
 {
-    logMessage(QObject::tr("UDP: Loading quests for %1 (%2)").arg(netviewId).arg(owner->name));
+    logMessage(QObject::tr("UDP: Loading quests for %1 (%2)").arg(owner->name).arg(this->name));
 
     QDir playerPath(QDir::currentPath());
     playerPath.cd("data");
@@ -215,7 +225,7 @@ void Pony::loadQuests()
     QFile file(QDir::currentPath()+"/data/players/"+owner->name.toLatin1()+"/quests.dat");
     if (!file.open(QIODevice::ReadOnly))
     {
-        logError(QObject::tr("Error loading quests for %1 (%2)").arg(netviewId).arg(owner->name));
+        logError(QObject::tr("Error loading quests for %1 (%2)").arg(owner->name).arg(this->name));
         return;
     }
     QByteArray questData = file.readAll();
@@ -255,9 +265,9 @@ void Pony::loadQuests()
     }
 }
 
-void Pony::saveInventory()
+void Pony::saveInventory(QList<QString> ponyNames)
 {
-    logMessage(QObject::tr("UDP: Saving inventory for %1 (%2)").arg(netviewId).arg(owner->name));
+    logMessage(QObject::tr("UDP: Saving inventory for %1 (%2)").arg(owner->name).arg(this->name));
 
     QDir playerPath(QDir::currentPath());
     playerPath.cd("data");
@@ -267,7 +277,7 @@ void Pony::saveInventory()
     QFile file(QDir::currentPath()+"/data/players/"+owner->name.toLatin1()+"/inventory.dat");
     if (!file.open(QIODevice::ReadWrite))
     {
-        logError(QObject::tr("Error saving inventory for %1 (%2)").arg(netviewId).arg(owner->name));
+        logError(QObject::tr("Error saving inventory for %1 (%2)").arg(owner->name).arg(this->name));
         return;
     }
     QByteArray invData = file.readAll();
@@ -282,10 +292,10 @@ void Pony::saveInventory()
 
         quint8 invSize = invData[i+nameSize+4];
         quint8 wornSize = invData[i+nameSize+4+1+invSize*9]; // Serialized sizeof InventoryItem is 9
-        if (entryName == this->name) // Delete the entry, we'll rewrite it at the end
+        if (entryName == this->name|| !ponyNames.contains(entryName)) // Delete the entry, we'll rewrite it at the end
         {
+            //logMessage(QObject::tr("saveInventory: Removing pony %1").arg(entryName));
             invData.remove(i,nameSize+4+1+invSize*9+1+wornSize*5);
-            break;
         }
         else // Skip this entry
             i += nameSize+4+1+invSize*9+1+wornSize*5;
@@ -315,7 +325,7 @@ void Pony::saveInventory()
 
 bool Pony::loadInventory()
 {
-    logMessage(QObject::tr("UDP: Loading inventory for %1 (%2)").arg(netviewId).arg(owner->name));
+    logMessage(QObject::tr("UDP: Loading inventory for %1 (%2)").arg(owner->name).arg(this->name));
 
     QDir playerPath(QDir::currentPath());
     playerPath.cd("data");
@@ -325,7 +335,7 @@ bool Pony::loadInventory()
     QFile file(QDir::currentPath()+"/data/players/"+owner->name.toLatin1()+"/inventory.dat");
     if (!file.open(QIODevice::ReadOnly))
     {
-        logError(QObject::tr("Error loading inventory for %1 (%2)").arg(netviewId).arg(owner->name));
+        logError(QObject::tr("Error loading inventory for %1 (%2)").arg(owner->name).arg(this->name));
         return false;
     }
     QByteArray invData = file.readAll();

@@ -33,9 +33,9 @@ public:
     Pony(Player* Owner);
     virtual ~Pony()=default;
     type getType();
-    void saveQuests(); ///< Saves the state of all the quests (NOT thread safe)
+    void saveQuests(QList<QString> ponyNames); ///< Saves the state of all the quests (NOT thread safe)
     void loadQuests(); ///< Loads the state of all the quests
-    void saveInventory(); ///< Saves the worn/possesed items and the money (NOT thread safe)
+    void saveInventory(QList<QString> ponyNames); ///< Saves the worn/possesed items and the money (NOT thread safe)
     bool loadInventory(); ///< Loads the worn/possesed items and the money. False on error.
     void addInventoryItem(quint32 id, quint32 qty); ///< Adds qty items with the given id to the inventory
     void removeInventoryItem(quint32 id, quint32 qty); ///< Removes qty of the item from the inventory

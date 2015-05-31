@@ -12,6 +12,8 @@
 
 using namespace Settings;
 
+QString lastMessage;
+
 #ifdef USE_CONSOLE
 App::App() :
 #else
@@ -42,9 +44,14 @@ void App::logStatusMessage(QString msg)
 {
 #ifdef USE_GUI
     QString logTime = QDateTime::currentDateTime().toString("HH:mm:ss");
-    ui->log->appendPlainText(logTime + "  " + msg);
+    QString newMessage = logTime + "  " + msg;
+    if (newMessage != lastMessage)
+    {
+        lastMessage = newMessage;
+        ui->log->appendPlainText(logTime + "  " + msg);
+        ui->log->repaint();
+    }
     ui->status->setText(msg);
-    ui->log->repaint();
     ui->status->repaint();
 #else
     cout << msg << endl;
@@ -58,8 +65,13 @@ void App::logMessage(QString msg)
         return;
 #ifdef USE_GUI
     QString logTime = QDateTime::currentDateTime().toString("HH:mm:ss");
-    ui->log->appendPlainText(logTime + "  " + msg);
-    ui->log->repaint();
+    QString newMessage = logTime + "  " + msg;
+    if (newMessage != lastMessage)
+    {
+        lastMessage = newMessage;
+        ui->log->appendPlainText(logTime + "  " + msg);
+        ui->log->repaint();
+    }
 #else
     cout << msg << endl;
 #endif
@@ -69,16 +81,21 @@ void App::logMessage(QString msg)
 void App::logStatusError(QString msg)
 {
 #ifdef USE_GUI
-    static QTextCharFormat defaultFormat, redFormat;
-    defaultFormat.setForeground(QBrush(Qt::black));
-    redFormat.setForeground(QBrush(Qt::red));
-    ui->log->setCurrentCharFormat(redFormat);
     QString logTime = QDateTime::currentDateTime().toString("HH:mm:ss");
-    ui->log->appendPlainText(logTime + "  " + msg);
+    QString newMessage = logTime + "  " + msg;
+    if (newMessage != lastMessage)
+    {
+        static QTextCharFormat defaultFormat, redFormat;
+        defaultFormat.setForeground(QBrush(Qt::black));
+        redFormat.setForeground(QBrush(Qt::red));
+        lastMessage = newMessage;
+        ui->log->setCurrentCharFormat(redFormat);
+        ui->log->appendPlainText(logTime + "  " + msg);
+        ui->log->repaint();
+        ui->log->setCurrentCharFormat(defaultFormat);
+    }
     ui->status->setText(msg);
-    ui->log->repaint();
     ui->status->repaint();
-    ui->log->setCurrentCharFormat(defaultFormat);
 #else
     cout << "ERROR: " << msg << endl;
 #endif
@@ -90,14 +107,19 @@ void App::logError(QString msg)
     if (!logInfos)
         return;
 #ifdef USE_GUI
-    static QTextCharFormat defaultFormat, redFormat;
-    defaultFormat.setForeground(QBrush(Qt::black));
-    redFormat.setForeground(QBrush(Qt::red));
-    ui->log->setCurrentCharFormat(redFormat);
     QString logTime = QDateTime::currentDateTime().toString("HH:mm:ss");
-    ui->log->appendPlainText(logTime + "  " + msg);
-    ui->log->repaint();
-    ui->log->setCurrentCharFormat(defaultFormat);
+    QString newMessage = logTime + "  " + msg;
+    if (newMessage != lastMessage)
+    {
+        static QTextCharFormat defaultFormat, redFormat;
+        defaultFormat.setForeground(QBrush(Qt::black));
+        redFormat.setForeground(QBrush(Qt::red));
+        lastMessage = newMessage;
+        ui->log->setCurrentCharFormat(redFormat);
+        ui->log->appendPlainText(logTime + "  " + msg);
+        ui->log->repaint();
+        ui->log->setCurrentCharFormat(defaultFormat);
+    }
 #else
     cout << "ERROR: " << msg << endl;
 #endif
@@ -116,12 +138,16 @@ App::~App()
 
         // Save the pony
         QList<Pony> ponies = Player::loadPonies(player);
+        QList<QString> ponyNames;
         for (int i=0; i<ponies.size(); i++)
+        {
             if (ponies[i].ponyData == player->pony.ponyData)
                 ponies[i] = player->pony;
+            ponyNames.append(ponies[i].name);
+        }
         Player::savePonies(player, ponies);
-        player->pony.saveInventory();
-        player->pony.saveQuests();
+        player->pony.saveQuests(ponyNames);
+        player->pony.saveInventory(ponyNames);
 
         // Free
         delete player;

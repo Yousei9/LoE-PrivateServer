@@ -283,7 +283,7 @@ void receiveMessage(Player* player)
             if (!player->pony.loadInventory()) // Create a default inventory if we can't find one saved
             {
                 player->pony.nBits = 15;
-                player->pony.saveInventory();
+//                player->pony.saveInventory(); // happens on logout/disconnect anyway
             }
 
             // Send instantiate to the players of the new scene

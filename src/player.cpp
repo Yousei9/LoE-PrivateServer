@@ -186,12 +186,16 @@ void Player::disconnectPlayerCleanup(Player* player)
 
     // Save the pony
     QList<Pony> ponies = loadPonies(player);
+    QList<QString> ponyNames;
     for (int i=0; i<ponies.size(); i++)
+    {
         if (ponies[i].ponyData == player->pony.ponyData)
             ponies[i] = player->pony;
+        ponyNames.append(ponies[i].name);
+    }
     savePonies(player, ponies);
-    player->pony.saveQuests();
-    player->pony.saveInventory();
+    player->pony.saveQuests(ponyNames);
+    player->pony.saveInventory(ponyNames);
 
     QString uIP = player->IP;
     quint16 uPort = player->port;

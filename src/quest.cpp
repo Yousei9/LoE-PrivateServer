@@ -19,6 +19,7 @@ Quest::Quest(QString path, Player *Owner)
     }
 
     QList<QString> lines = QString(file.readAll().replace('\r',"")).split('\n');
+    file.close();
 
     owner = Owner;
     commands = new QList<QList<QString> >;
