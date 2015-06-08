@@ -45,6 +45,7 @@ void App::sendCmdLine()
     {
         QString indent = "  -";
 
+        app.printBasicHelp();
         logMessage(QObject::tr("== Server Commands"));
 #ifdef USE_GUI
         logMessage("clear");
@@ -61,7 +62,9 @@ void App::sendCmdLine()
         logMessage("status");
         logMessage(QObject::tr("%1 Shows the status of the login and game servers").arg(indent));
         logMessage("listTcpPlayers");
-        logMessage(QObject::tr("%1 Lists players currently logged into the game server").arg(indent));
+        logMessage(QObject::tr("%1 Lists players registered with the game server").arg(indent));
+        logMessage("removeTcpPlayer");
+        logMessage(QObject::tr("%1 removes player from playerDB (doesn't delete ponies)").arg(indent));
         logMessage("listPeers [scene]");
         logMessage(QObject::tr("%1 Lists the peers currently connected to the server").arg(indent));
         logMessage(QObject::tr("%1 If scene name is defined, return only peers in that scene").arg(indent));
@@ -141,9 +144,7 @@ void App::sendCmdLine()
         logMessage("listInventory");
         logMessage(QObject::tr("%1 Lists the inventory of the selected player").arg(indent));
         logMessage("listWorn");
-        logMessage(QObject::tr("%1 Lists all items the player is wearing").arg(indent));
-        logMessage("");
-        app.printBasicHelp();
+        logMessage(QObject::tr("%1 Lists all items the player is wearing").arg(indent));       
         return;
     }
     else if (str == "clear")
@@ -224,13 +225,48 @@ void App::sendCmdLine()
         delete this;
         return;
     }
-    else if (str == "listTcpPlayers")
+    else if (str.startsWith("listTcpPlayers", Qt::CaseInsensitive))
     {
         for (int i=0; i<Player::tcpPlayers.size(); i++)
         {
             Player* p = Player::tcpPlayers[i];
             logMessage(p->name+" "+p->IP+":"+QString().setNum(p->port));
         }
+        return;
+    }
+    else if (str.startsWith("removeTcpPlayer", Qt::CaseInsensitive))
+    {
+        if (str.size() < 17)
+        {
+            logMessage(tr("removeTcpPlayer takes account name as argument"));
+            return;
+        }
+
+        str = str.right(str.size()-16);
+
+        //logMessage(tr("looking for playername: %1").arg(str));
+        bool found = false;
+        for (int i=Player::tcpPlayers.size()-1; i>=0; i--)
+        {
+            if (str == Player::tcpPlayers[i]->name)
+            {
+                logMessage(tr("removing %1 at position %2//%3").arg(str).arg(i).arg(Player::tcpPlayers.size()-1));
+                Player::tcpPlayers.removeAt(i);
+                found = true;
+            }
+        }
+        if (found)
+        {
+            if (!Player::savePlayers(Player::tcpPlayers))
+            {
+                logError(tr("Error saving players."));
+            }
+        }
+        else
+        {
+            logMessage(tr("playername %1 not found").arg(str));
+        }
+
         return;
     }
     else if (str.startsWith("setPeer", Qt::CaseInsensitive))

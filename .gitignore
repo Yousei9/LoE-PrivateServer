@@ -49,3 +49,4 @@ moreInfos/wiki
 # Archives
 *.zip
 *.7z
+data/server.ini

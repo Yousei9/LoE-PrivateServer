@@ -314,8 +314,9 @@ void App::tcpProcessData(QByteArray data, QTcpSocket* socket)
         }
         else
         {
+            //ToDO: add client version check
             logMessage(tr("Version : ","Version of the client software")
-                           +postData.mid(postData.indexOf("version=")+8));
+                           +postData.mid(postData.indexOf("version=")+8));            
             bool ok=true;
             postData = postData.right(postData.size()-postData.indexOf("username=")-9);
             QString username = postData;
@@ -323,9 +324,9 @@ void App::tcpProcessData(QByteArray data, QTcpSocket* socket)
             postData = postData.right(postData.size()-postData.indexOf("passhash=")-9);
             QString passhash = postData;
             passhash.truncate(postData.indexOf('&'));
-            logMessage(tr("IP : ","An IP address")+socket->peerAddress().toString());
-            logMessage(tr("Username : ")+username);
-            logMessage(tr("Passhash : ","A cryptographic hash of a password")+passhash);
+            logMessage(tr("IP : %1","An IP address").arg(socket->peerAddress().toString()));
+            logMessage(tr("Username : %1").arg(username));
+            logMessage(tr("Passhash : %1","A cryptographic hash of a password").arg(passhash));
 
             // Add player to the players list
             Player* player = Player::findPlayer(Player::tcpPlayers, username);
