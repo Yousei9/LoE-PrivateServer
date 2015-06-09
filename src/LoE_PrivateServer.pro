@@ -8,6 +8,7 @@ TARGET = LoE_PrivateServer
 VERSION = 0.5.6
 
 QT       += core network
+QT       += xml
 TEMPLATE = app
 
 # build as a console application

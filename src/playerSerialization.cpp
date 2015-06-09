@@ -5,6 +5,8 @@
 #include "serialize.h"
 #include "quest.h"
 #include "items.h"
+#include <QXmlStreamWriter>
+#include <QtXml/qdom.h>
 
 #define DEBUG_LOG false
 
@@ -77,86 +79,146 @@ void Player::savePonies(Player *player, QList<Pony> ponies)
     playerPath.cd("players");
     playerPath.mkdir(player->name.toLatin1());
 
-    QFile file(QDir::currentPath()+"/data/players/"+player->name.toLatin1()+"/ponies.dat");
+    // save in xml format
+    QFile xmlfile(QDir::currentPath()+"/data/players/"+player->name.toLatin1()+"/ponies.xml");
 
-    if (!file.open(QIODevice::ReadWrite | QIODevice::Truncate))
+    if (!xmlfile.open(QIODevice::ReadWrite | QIODevice::Truncate))
     {
-        logError(QObject::tr("Error saving ponies for %1 (%2)").arg(player->pony.netviewId).arg(player->name));
+        logError(QObject::tr("Error saving ponies for %1 (%2)").arg(player->name).arg(player->pony.netviewId));
         return;
     }
 
+    QXmlStreamWriter xmlWriter(&xmlfile);
+    xmlWriter.setAutoFormatting(true);
+    xmlWriter.writeStartDocument();
+    xmlWriter.writeStartElement("ponies");
+
     for (int i=0; i<ponies.size(); i++)
     {
-        file.write(ponies[i].ponyData);
-        file.write(vectorToData(ponies[i].pos));
-        file.write(stringToData(ponies[i].sceneName.toLower()));        
+        xmlWriter.writeStartElement("pony");
+            xmlWriter.writeTextElement("name", ponies[i].name);
+            xmlWriter.writeTextElement("ponydata", ponies[i].ponyData.toBase64());
+            if (ponies[i].accessLvl == 0)
+                ponies[i].accessLvl = 1;
+            xmlWriter.writeTextElement("accesslevel", QString::number(ponies[i].accessLvl));
+            xmlWriter.writeStartElement("pos");
+                xmlWriter.writeAttribute("x", QString::number(ponies[i].pos.x));
+                xmlWriter.writeAttribute("y", QString::number(ponies[i].pos.y));
+                xmlWriter.writeAttribute("z", QString::number(ponies[i].pos.z));
+            xmlWriter.writeEndElement();
+            xmlWriter.writeTextElement("scene", ponies[i].sceneName.toLower());
+        xmlWriter.writeEndElement();
     }
 
-    file.close();
+    xmlWriter.writeEndElement();
+    xmlWriter.writeEndDocument();
+
+    if (xmlWriter.hasError())
+    {
+        logError("XMLWriter Error");
+    }
+
+    xmlfile.close();
 
 }
 
 QList<Pony> Player::loadPonies(Player* player)
 {
     QList<Pony> ponies;
-    QFile file(QDir::currentPath()+"/data/players/"+player->name.toLatin1()+"/ponies.dat");
-    if (!file.open(QIODevice::ReadOnly))
-        return ponies;
-
-    QByteArray data = file.readAll();
-
-    int i=0;
-    while (i<data.size())
+    QDomDocument doc;
+    QFile xmlfile(QDir::currentPath()+"/data/players/"+player->name.toLatin1()+"/ponies.xml");
+    if(xmlfile.open(QIODevice::ReadOnly) && doc.setContent(&xmlfile)) // parse xml file
     {
-        Pony pony{player};
-        // Read the ponyData
-        unsigned strlen;
-        unsigned lensize=0;
-        {
-            unsigned char num3; int num=0, num2=0;
-            do {
-                num3 = data[i+lensize]; lensize++;
-                num |= (num3 & 0x7f) << num2;
-                num2 += 7;
-            } while ((num3 & 0x80) != 0);
-            strlen = (uint) num;
-        }
-        int ponyDataSize = strlen+lensize+PONYDATA_SIZE;
-        pony.ponyData = data.mid(i,ponyDataSize);
-        pony.name = dataToString(pony.ponyData); // The name is the first elem
-        //app.logMessage("Found pony : "+pony.name);
-        i+=ponyDataSize;
+        QDomNodeList DomPonies = doc.elementsByTagName("pony");
+        for (int i = 0; i < DomPonies.size(); i++) {
+            QDomNode n = DomPonies.item(i);
+            QDomElement DomName = n.firstChildElement("name");
+            QDomElement DomPonyData = n.firstChildElement("ponydata");
+            QDomElement DomAccess = n.firstChildElement("accesslevel");
+            QDomElement DomScene = n.firstChildElement("scene");
+            QDomElement DomPos = n.firstChildElement("pos");
+            if (DomName.isNull() || DomPonyData.isNull() || DomAccess.isNull() || DomScene.isNull() || DomPos.isNull() )
+                continue;
 
-        // Read pos
-        UVector pos = dataToVector(data.mid(i,12));
-        pony.pos = pos;
-        i+=12;
+            Pony pony{player};
+            pony.ponyData = QByteArray::fromBase64(DomPonyData.text().toUtf8());
+            pony.name = dataToString(pony.ponyData);
+            pony.accessLvl = DomAccess.text().toUInt();
+            pony.sceneName = DomScene.text();
+            pony.pos.x = DomPos.attribute("x").toFloat();
+            pony.pos.y = DomPos.attribute("y").toFloat();
+            pony.pos.z = DomPos.attribute("z").toFloat();
+            logMessage(QObject::tr("found pony %1, access lvl: %2").arg(pony.name).arg(pony.accessLvl));
 
-        // Read sceneName
-        unsigned strlen2;
-        unsigned lensize2=0;
-        {
-            unsigned char num3; int num=0, num2=0;
-            do {
-                num3 = data[i+lensize2]; lensize2++;
-                num |= (num3 & 0x7f) << num2;
-                num2 += 7;
-            } while ((num3 & 0x80) != 0);
-            strlen2 = (uint) num;
-        }
-        pony.sceneName = data.mid(i+lensize2, strlen2).toLower();
-        i+=strlen2+lensize2;
-
-        // Create quests
-        for (int i=0; i<Quest::quests.size(); i++)
-        {
-            Quest quest = Quest::quests[i];
-            quest.setOwner(player);
-            pony.quests << quest;
+            ponies << pony;
         }
 
-        ponies << pony;
-    }
+        xmlfile.close();
+    } // end parse xml
+
+    else // if no xml file exists, parse dat file
+    {
+        QFile file(QDir::currentPath()+"/data/players/"+player->name.toLatin1()+"/ponies.dat");
+        if (!file.open(QIODevice::ReadOnly))
+            return ponies;
+
+        QByteArray data = file.readAll();
+        file.close();
+
+        int i=0;
+        while (i<data.size())
+        {
+            Pony pony{player};
+            // Read the ponyData
+            unsigned strlen;
+            unsigned lensize=0;
+            {
+                unsigned char num3; int num=0, num2=0;
+                do {
+                    num3 = data[i+lensize]; lensize++;
+                    num |= (num3 & 0x7f) << num2;
+                    num2 += 7;
+                } while ((num3 & 0x80) != 0);
+                strlen = (uint) num;
+            }
+            int ponyDataSize = strlen+lensize+PONYDATA_SIZE;
+            pony.ponyData = data.mid(i,ponyDataSize);
+            pony.name = dataToString(pony.ponyData); // The name is the first elem
+            //app.logMessage("Found pony : "+pony.name);
+            i+=ponyDataSize;
+
+            // Read pos
+            UVector pos = dataToVector(data.mid(i,12));
+            pony.pos = pos;
+            i+=12;
+
+            // Read sceneName
+            unsigned strlen2;
+            unsigned lensize2=0;
+            {
+                unsigned char num3; int num=0, num2=0;
+                do {
+                    num3 = data[i+lensize2]; lensize2++;
+                    num |= (num3 & 0x7f) << num2;
+                    num2 += 7;
+                } while ((num3 & 0x80) != 0);
+                strlen2 = (uint) num;
+            }
+            pony.sceneName = data.mid(i+lensize2, strlen2).toLower();
+            i+=strlen2+lensize2;
+
+            // Create quests
+            for (int i=0; i<Quest::quests.size(); i++)
+            {
+                Quest quest = Quest::quests[i];
+                quest.setOwner(player);
+                pony.quests << quest;
+            }
+            pony.accessLvl = 1;
+
+            ponies << pony;
+        }
+    } // end parse dat file
 
     return ponies;
 }
