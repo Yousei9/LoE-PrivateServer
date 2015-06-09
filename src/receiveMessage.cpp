@@ -231,26 +231,35 @@ void receiveMessage(Player* player)
             QList<Pony> ponies = Player::loadPonies(player);
             QByteArray ponyData = msg.right(msg.size()-10);
             Pony pony{player};
+            bool validName = true;
 
             // Fix invalid names
             QString ponyName = dataToString(ponyData);
             if (ponyName.length() < 3)
-                ponyName = "invalid name";
+                validName = false;
 
-            if (ponyName.count(' ') > 1)
+            if (ponyName.count(' ') >= 1)
             {
                 QStringList words = ponyName.split(' ');
                 if (words[0].length() < 3 || words[1].length() < 3)
-                    ponyName = "invalid name";
+                    validName = false;
                 else
                     ponyName = words[0] + ' ' + words[1];
+            }           
+
+            if(!validName){
+                logError(QObject::tr("UDP: invalid pony name %1. Disconnecting user %2.").arg(ponyName).arg(player->name));
+                sendMessage(player,MsgDisconnect, "Pony names need to be longer than 3 characters and contain only one whitespace.");
+                Player::disconnectPlayerCleanup(player); // Save game and remove the player
+                return; // It's ok, since we just disconnected the player
             }
+
 
             if ((unsigned char)msg[6]==0xff && (unsigned char)msg[7]==0xff && (unsigned char)msg[8]==0xff && (unsigned char)msg[9]==0xff)
             {
                 // Create the new pony for this player
                 pony.ponyData = ponyData;
-                pony.name = dataToString(ponyData);
+                pony.name = ponyName;
 //                if (pony.getType() == Pony::Unicorn)
 //                    pony.sceneName = "canterlot";
 //                else if (pony.getType() == Pony::Pegasus)
@@ -271,6 +280,7 @@ void receiveMessage(Player* player)
                     return; // It's ok, since we just disconnected the player
                 }
                 ponies[id].ponyData = ponyData;
+                ponies[id].name = ponyName;
                 pony = ponies[id];
             }
             pony.id = player->pony.id;

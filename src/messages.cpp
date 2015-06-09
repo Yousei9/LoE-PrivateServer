@@ -582,12 +582,14 @@ void sendChatBroadcast(Player* player, QString message, QString author)
 
 void sendChatMessage(Player* player, QString message, QString author, quint8 chatType)
 {
+    logMessage(QObject::tr("access level: %1 (%2)").arg(player->pony.accessLvl).arg((quint8)(player->pony.accessLvl&0xFF)));
+
     QByteArray idAndAccess(5,0);
     idAndAccess[0] = (quint8)(player->pony.netviewId&0xFF);
     idAndAccess[1] = (quint8)((player->pony.netviewId << 8)&0xFF);
     idAndAccess[2] = (quint8)((player->pony.id&0xFF));
     idAndAccess[3] = (quint8)((player->pony.id << 8)&0xFF);
-    idAndAccess[4] = 0x0; // Access level
+    idAndAccess[4] = (quint8)(player->pony.accessLvl&0xFF); // Access level
     QByteArray data(2,0);
     data[0] = 0xf; // RPC ID
     data[1] = chatType;

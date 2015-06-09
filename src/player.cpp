@@ -25,6 +25,7 @@ SceneEntity::SceneEntity()
     modelName = QString();
     id = 0;
     netviewId = 0;
+    accessLvl = 0;
     pos=UVector(0,0,0);
     rot=UQuaternion(0,0,0,0);
     sceneName = QString();
