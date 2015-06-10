@@ -59,6 +59,7 @@ public:
     bool dead; // If true, the player is in the room, but not instantiated
     float maxHealth;
     float defense;
+    quint8 accessLvl;
 };
 
 class Player : QObject

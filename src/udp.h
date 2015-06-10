@@ -5,6 +5,7 @@ class QUdpSocket;
 
 void udpProcessPendingDatagrams();
 void restartUdpServer();
+void disconnectUdpPlayers();
 
 extern QUdpSocket* udpSocket;
 

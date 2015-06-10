@@ -149,3 +149,28 @@ void udpProcessPendingDatagrams()
         }
     }
 }
+
+void disconnectUdpPlayers()
+{
+    //logMessage(tr("UDP: Disconnecting all players"));
+    while (Player::udpPlayers.size())
+    {
+        Player* player = Player::udpPlayers[0];
+        sendMessage(player, MsgDisconnect, "Server closed by the admin");
+
+        // Save the pony
+        QList<Pony> ponies = Player::loadPonies(player);
+        for (int i=0; i<ponies.size(); i++)
+        {
+            if (ponies[i].ponyData == player->pony.ponyData)
+                ponies[i] = player->pony;
+        }
+        Player::savePonies(player, ponies);
+        //player->pony.saveQuests(ponyNames);
+        //player->pony.saveInventory(ponyNames);
+
+        // Free
+        delete player;
+        Player::udpPlayers.removeFirst();
+    }
+}

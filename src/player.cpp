@@ -25,7 +25,6 @@ SceneEntity::SceneEntity()
     modelName = QString();
     id = 0;
     netviewId = 0;
-    accessLvl = 0;
     pos=UVector(0,0,0);
     rot=UQuaternion(0,0,0,0);
     sceneName = QString();
@@ -39,6 +38,7 @@ Pony::Pony(Player *Owner)
     name = "";
     wornSlots = 0;
     health = maxHealth;
+    accessLvl = 0;
 }
 
 Pony::type Pony::getType()
@@ -187,16 +187,14 @@ void Player::disconnectPlayerCleanup(Player* player)
 
     // Save the pony
     QList<Pony> ponies = loadPonies(player);
-    QList<QString> ponyNames;
     for (int i=0; i<ponies.size(); i++)
     {
         if (ponies[i].ponyData == player->pony.ponyData)
             ponies[i] = player->pony;
-        ponyNames.append(ponies[i].name);
     }
     savePonies(player, ponies);
-    player->pony.saveQuests(ponyNames);
-    player->pony.saveInventory(ponyNames);
+    //player->pony.saveQuests(ponyNames);
+    //player->pony.saveInventory(ponyNames);
 
     QString uIP = player->IP;
     quint16 uPort = player->port;

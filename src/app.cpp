@@ -130,36 +130,6 @@ void App::logError(QString msg)
 App::~App()
 {
     logInfos=false; // logMessage while we're trying to destroy would crash.
-    //logMessage(tr("UDP: Disconnecting all players"));
-    while (Player::udpPlayers.size())
-    {
-        Player* player = Player::udpPlayers[0];
-        sendMessage(player, MsgDisconnect, "Server closed by the admin");
-
-        // Save the pony
-        QList<Pony> ponies = Player::loadPonies(player);
-        QList<QString> ponyNames;
-        for (int i=0; i<ponies.size(); i++)
-        {
-            if (ponies[i].ponyData == player->pony.ponyData)
-                ponies[i] = player->pony;
-            ponyNames.append(ponies[i].name);
-        }
-        Player::savePonies(player, ponies);
-        player->pony.saveQuests(ponyNames);
-        player->pony.saveInventory(ponyNames);
-
-        // Free
-        delete player;
-        Player::udpPlayers.removeFirst();
-    }
-
-    for (int i=0; i<Quest::quests.size(); i++)
-    {
-        delete Quest::quests[i].commands;
-        delete Quest::quests[i].name;
-        delete Quest::quests[i].descr;
-    }
 
     stopGameServer(false);
     stopLoginServer(false);

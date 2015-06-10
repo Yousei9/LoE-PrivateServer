@@ -267,6 +267,18 @@ void receiveMessage(Player* player)
 //                else
                 pony.sceneName = "ponyville";
                 pony.pos = findVortex(pony.sceneName, 0).destPos;
+
+                // create default inventory
+                pony.nBits = 15;
+
+                // create default quest list
+                for (int i=0; i<Quest::quests.size(); i++)
+                {
+                    Quest quest = Quest::quests[i];
+                    quest.setOwner(player);
+                    pony.quests << quest;
+                }
+
                 ponies += pony;
             }
             else
@@ -287,14 +299,14 @@ void receiveMessage(Player* player)
             pony.netviewId = player->pony.netviewId;
             player->pony = pony;
 
-            Player::savePonies(player, ponies);
-
             player->pony.loadQuests();
             if (!player->pony.loadInventory()) // Create a default inventory if we can't find one saved
             {
                 player->pony.nBits = 15;
 //                player->pony.saveInventory(); // happens on logout/disconnect anyway
             }
+
+            Player::savePonies(player, ponies);
 
             // Send instantiate to the players of the new scene
             sendLoadSceneRPC(player, player->pony.sceneName, player->pony.pos);
@@ -318,9 +330,9 @@ void receiveMessage(Player* player)
         }
         else if ((unsigned char)msg[0]==MsgUserReliableOrdered4 && (unsigned char)msg[5]==0x2) // Delete pony request
         {
-            logMessage(QObject::tr("UDP: Deleting a character"));
             QList<Pony> ponies = Player::loadPonies(player);
             quint32 id = (quint8)msg[6] +((quint8)msg[7]<<8) + ((quint8)msg[8]<<16) + ((quint8)msg[9]<<24);
+            logMessage(QObject::tr("UDP: Deleting character %1 (%2)").arg(ponies[id].name).arg(player->name));
             ponies.removeAt(id);
 
             Player::savePonies(player,ponies);
