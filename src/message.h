@@ -84,9 +84,9 @@ void sendSetBitsRPC(Player* player); // Resend how many bits we have to the clie
 void sendSkillsRPC(Player* player, QList<QPair<quint32, quint32> >& skills);
 bool sendLoadSceneRPC(Player* player, QString sceneName);
 bool sendLoadSceneRPC(Player* player, QString sceneName, UVector pos);
-void sendChannelMessage(Player* player, qint8 channel, QString message, QString author);
-void sendChatBroadcast(Player* player, QString message, QString author);
-void sendChatMessage(Player* player, QString message, QString author, quint8 chatType);
+void sendChannelMessage(QString sceneName, qint8 channel, QString message, QString author, quint8 accessLevel);
+void sendChatBroadcast(Player* to, QString message, QString author, quint8 accessLevel);
+void sendChatMessage(Player* to, QString message, QString author, quint8 chatType, quint8 accessLevel);
 void sendMove(Player* player, float x, float y, float z);
 void sendBeginDialog(Player* player);
 void sendDialogMessage(Player* player, QString& message, QString NPCName, quint16 iconId=0);

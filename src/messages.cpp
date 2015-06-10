@@ -541,11 +541,11 @@ bool sendLoadSceneRPC(Player* player, QString sceneName, UVector pos) // Loads a
     return true;
 }
 
-void sendChannelMessage(Player* player, qint8 channel, QString message, QString author)
+void sendChannelMessage(QString sceneName, qint8 channel, QString message, QString author, quint8 accessLevel)
 {
    if (channel==ChatLocal)
    {
-       Scene* scene = findScene(player->pony.sceneName);
+       Scene* scene = findScene(sceneName);
        if (scene->name.isEmpty())
            logError(QObject::tr("UDP: Can't find the scene for chat message, aborting"));
        else
@@ -554,7 +554,7 @@ void sendChannelMessage(Player* player, qint8 channel, QString message, QString 
            {
                if (scene->players[i]->inGame>=2)
                {
-                   sendChatMessage(scene->players[i], message, author, ChatLocal);
+                   sendChatMessage(scene->players[i], message, author, ChatLocal, accessLevel);
                }
            }
        }
@@ -565,38 +565,37 @@ void sendChannelMessage(Player* player, qint8 channel, QString message, QString 
        {
            if (Player::udpPlayers[i]->inGame>=1)
            {
-               sendChatMessage(Player::udpPlayers[i], message, author, channel);
+               sendChatMessage(Player::udpPlayers[i], message, author, channel, accessLevel);
            }
        }
    }
 }
 
-void sendChatBroadcast(Player* player, QString message, QString author)
+void sendChatBroadcast(Player* to, QString message, QString author, quint8 accessLevel)
 {
-    sendChatMessage(player, message, author, ChatGeneral);
-    sendChatMessage(player, message, author, ChatLocal);
-    sendChatMessage(player, message, author, ChatParty);
-    sendChatMessage(player, message, author, ChatGuild);
-    sendChatMessage(player, message, author, ChatWhisper);
+    sendChatMessage(to, message, author, ChatGeneral, accessLevel);
+    sendChatMessage(to, message, author, ChatLocal, accessLevel);
+    sendChatMessage(to, message, author, ChatParty, accessLevel);
+    sendChatMessage(to, message, author, ChatGuild, accessLevel);
+    sendChatMessage(to, message, author, ChatWhisper, accessLevel);
 }
 
-void sendChatMessage(Player* player, QString message, QString author, quint8 chatType)
+void sendChatMessage(Player* to, QString message, QString author, quint8 chatType, quint8 accessLevel)
 {
-    logMessage(QObject::tr("access level: %1 (%2)").arg(player->pony.accessLvl).arg((quint8)(player->pony.accessLvl&0xFF)));
-
     QByteArray idAndAccess(5,0);
-    idAndAccess[0] = (quint8)(player->pony.netviewId&0xFF);
-    idAndAccess[1] = (quint8)((player->pony.netviewId << 8)&0xFF);
-    idAndAccess[2] = (quint8)((player->pony.id&0xFF));
-    idAndAccess[3] = (quint8)((player->pony.id << 8)&0xFF);
-    idAndAccess[4] = (quint8)(player->pony.accessLvl&0xFF); // Access level
+    idAndAccess[0] = (quint8)(to->pony.netviewId&0xFF);
+    idAndAccess[1] = (quint8)((to->pony.netviewId << 8)&0xFF);
+    idAndAccess[2] = (quint8)((to->pony.id&0xFF));
+    idAndAccess[3] = (quint8)((to->pony.id << 8)&0xFF);
+    idAndAccess[4] = (quint8)(accessLevel&0xFF); // Access level
+    //idAndAccess[4] = 0x0; // Access level
     QByteArray data(2,0);
     data[0] = 0xf; // RPC ID
     data[1] = chatType;
     data += stringToData(author);
     data += stringToData(message);
     data += idAndAccess;
-    sendMessage(player,MsgUserReliableOrdered4,data); // Sends a 46
+    sendMessage(to,MsgUserReliableOrdered4,data); // Sends a 46
 }
 
 void sendMove(Player* player, float x, float y, float z)

@@ -15,7 +15,6 @@ public:
     QString modelName;
     quint16 id;
     quint16 netviewId;
-    quint8 accessLvl;
 
     // Pos
     QString sceneName;
