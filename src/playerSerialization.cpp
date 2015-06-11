@@ -83,7 +83,7 @@ void Player::savePonies(Player *player, QList<Pony> ponies)
     playerPath.mkdir(player->name.toLatin1());
 
     // save in xml format
-    QFile xmlfile(QDir::currentPath()+"/data/players/"+player->name.toLatin1()+"/ponies.xml");
+    QFile xmlfile(QDir::currentPath()+"/data/players/"+player->name.toLatin1()+".xml");
 
     if (!xmlfile.open(QIODevice::ReadWrite | QIODevice::Truncate))
     {
@@ -165,59 +165,133 @@ void Player::savePonies(Player *player, QList<Pony> ponies)
 
 }
 
+QList<Pony> Player::loadPoniesDat(Player* player)
+{
+    QList<Pony> ponies;
+    QFile file(QDir::currentPath()+"/data/players/"+player->name.toLatin1()+"/ponies.dat");
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        logError(QObject::tr("Error reading ponies for %1").arg(player->name));
+        return ponies;
+    }
+
+    QByteArray data = file.readAll();
+    file.close();
+
+    int i=0;
+    while (i<data.size())
+    {
+        Pony pony{player};
+        // Read the ponyData
+        unsigned strlen;
+        unsigned lensize=0;
+        {
+            unsigned char num3; int num=0, num2=0;
+            do {
+                num3 = data[i+lensize]; lensize++;
+                num |= (num3 & 0x7f) << num2;
+                num2 += 7;
+            } while ((num3 & 0x80) != 0);
+            strlen = (uint) num;
+        }
+        int ponyDataSize = strlen+lensize+PONYDATA_SIZE;
+        pony.ponyData = data.mid(i,ponyDataSize);
+        pony.name = dataToString(pony.ponyData); // The name is the first elem
+        //app.logMessage("Found pony : "+pony.name);
+        i+=ponyDataSize;
+
+        // Read pos
+        UVector pos = dataToVector(data.mid(i,12));
+        pony.pos = pos;
+        i+=12;
+
+        // Read sceneName
+        unsigned strlen2;
+        unsigned lensize2=0;
+        {
+            unsigned char num3; int num=0, num2=0;
+            do {
+                num3 = data[i+lensize2]; lensize2++;
+                num |= (num3 & 0x7f) << num2;
+                num2 += 7;
+            } while ((num3 & 0x80) != 0);
+            strlen2 = (uint) num;
+        }
+        pony.sceneName = data.mid(i+lensize2, strlen2).toLower();
+        i+=strlen2+lensize2;
+
+        // Create quests
+        for (int i=0; i<Quest::quests.size(); i++)
+        {
+            Quest quest = Quest::quests[i];
+            quest.setOwner(player);
+            pony.quests << quest;
+        }
+        pony.accessLvl = 1;
+
+        ponies << pony;
+    }
+    return ponies;
+} // end parse dat file
+
 QList<Pony> Player::loadPonies(Player* player)
 {
     QList<Pony> ponies;
     QDomDocument doc;
-    QFile xmlfile(QDir::currentPath()+"/data/players/"+player->name.toLatin1()+"/ponies.xml");
-    if(xmlfile.open(QIODevice::ReadOnly) && doc.setContent(&xmlfile)) // parse xml file
+    QFile xmlfile(QDir::currentPath()+"/data/players/"+player->name.toLatin1()+".xml");
+    if(!xmlfile.open(QIODevice::ReadOnly) || !doc.setContent(&xmlfile)) // parse xml file
     {
-        QDomNodeList DomPonies = doc.elementsByTagName("pony");
-        for (int i = 0; i < DomPonies.size(); i++) {
-            QDomNode n = DomPonies.item(i);
-            // read pony
-            QDomElement DomName = n.firstChildElement("name");
-            QDomElement DomPonyData = n.firstChildElement("ponydata");
-            QDomElement DomAccess = n.firstChildElement("accesslevel");
-            QDomElement DomScene = n.firstChildElement("scene");
-            QDomElement DomPos = n.firstChildElement("pos");
+        logError(QObject::tr("Error reading ponies for %1").arg(player->name));
+        return ponies;
+    }
 
-            if (DomName.isNull() || DomPonyData.isNull() || DomAccess.isNull() || DomScene.isNull() || DomPos.isNull() )
-                continue;
+    QDomNodeList DomPonies = doc.elementsByTagName("pony");
+    for (int i = 0; i < DomPonies.size(); i++)
+    {
+        QDomNode n = DomPonies.item(i);
+        // read pony
+        QDomElement DomName = n.firstChildElement("name");
+        QDomElement DomPonyData = n.firstChildElement("ponydata");
+        QDomElement DomAccess = n.firstChildElement("accesslevel");
+        QDomElement DomScene = n.firstChildElement("scene");
+        QDomElement DomPos = n.firstChildElement("pos");
 
-            Pony pony{player};
-            pony.ponyData = QByteArray::fromBase64(DomPonyData.text().toUtf8());
-            pony.name = dataToString(pony.ponyData);
-            pony.accessLvl = DomAccess.text().toUInt();
-            pony.sceneName = DomScene.text();
-            pony.pos.x = DomPos.attribute("x").toFloat();
-            pony.pos.y = DomPos.attribute("y").toFloat();
-            pony.pos.z = DomPos.attribute("z").toFloat();
+        if (DomName.isNull() || DomPonyData.isNull() || DomAccess.isNull() || DomScene.isNull() || DomPos.isNull() )
+            continue;
 
-            //logMessage(QObject::tr("found pony %1, access lvl: %2").arg(pony.name).arg(pony.accessLvl));
+        Pony pony{player};
+        pony.ponyData = QByteArray::fromBase64(DomPonyData.text().toUtf8());
+        pony.name = dataToString(pony.ponyData);
+        pony.accessLvl = DomAccess.text().toUInt();
+        pony.sceneName = DomScene.text();
+        pony.pos.x = DomPos.attribute("x").toFloat();
+        pony.pos.y = DomPos.attribute("y").toFloat();
+        pony.pos.z = DomPos.attribute("z").toFloat();
 
-            // read inventory
-            QDomElement DomBits = n.firstChildElement("bits");
-            if (DomBits.isNull() || DomBits.text().isNull() || DomBits.text().isEmpty())
-                pony.nBits = 0;
-            else
-                pony.nBits = DomBits.text().toInt();
+        //logMessage(QObject::tr("found pony %1, access lvl: %2").arg(pony.name).arg(pony.accessLvl));
 
-            QDomElement DomInventory = n.firstChildElement("inventory");
-            QDomNodeList DomInventoryItems = DomInventory.elementsByTagName("item");
-            for (int j = 0; j < DomInventoryItems.size(); j++)
-            {
-                 if(DomInventoryItems.item(j).isElement())
-                 {
-                     QDomElement DomItem = DomInventoryItems.item(j).toElement();
-                     InventoryItem item;
-                     item.index = DomItem.attribute("slot").toInt();
-                     item.id = DomItem.attribute("id").toInt();
-                     item.amount = DomItem.attribute("amount").toInt();
+        // read inventory
+        QDomElement DomBits = n.firstChildElement("bits");
+        if (DomBits.isNull() || DomBits.text().isNull() || DomBits.text().isEmpty())
+            pony.nBits = 0;
+        else
+            pony.nBits = DomBits.text().toInt();
 
-                     pony.inv.append(item);
-                 }
-            }
+        QDomElement DomInventory = n.firstChildElement("inventory");
+        QDomNodeList DomInventoryItems = DomInventory.elementsByTagName("item");
+        for (int j = 0; j < DomInventoryItems.size(); j++)
+        {
+             if(DomInventoryItems.item(j).isElement())
+             {
+                 QDomElement DomItem = DomInventoryItems.item(j).toElement();
+                 InventoryItem item;
+                 item.index = DomItem.attribute("slot").toInt();
+                 item.id = DomItem.attribute("id").toInt();
+                 item.amount = DomItem.attribute("amount").toInt();
+
+                 pony.inv.append(item);
+             }
+        }
 
 //            logMessage(pony.name + "'s inventory from xml:");
 //            for (const InventoryItem& item : pony.inv)
@@ -225,122 +299,56 @@ QList<Pony> Player::loadPonies(Player* player)
 //                logMessage(QObject::tr("slot: %1, item: %2, amount: %3").arg(item.index).arg(item.id).arg(item.amount));
 //            }
 
-            QDomElement DomWorn = n.firstChildElement("equipped");
-            QDomNodeList DomWornItems = DomWorn.elementsByTagName("item");
-            for (int j = 0; j < DomWornItems.size(); j++)
+        QDomElement DomWorn = n.firstChildElement("equipped");
+        QDomNodeList DomWornItems = DomWorn.elementsByTagName("item");
+        for (int j = 0; j < DomWornItems.size(); j++)
+        {
+            if(DomWornItems.item(j).isElement())
             {
-                if(DomWornItems.item(j).isElement())
-                {
-                    QDomElement DomItem = DomWornItems.item(j).toElement();
-                    WearableItem item;
-                    item.index = DomItem.attribute("slot").toInt();
-                    item.id = DomItem.attribute("id").toInt();
+                QDomElement DomItem = DomWornItems.item(j).toElement();
+                WearableItem item;
+                item.index = DomItem.attribute("slot").toInt();
+                item.id = DomItem.attribute("id").toInt();
 
-                    pony.worn.append(item);
-                    pony.wornSlots |= wearablePositionsMap[item.id];
-                }
+                pony.worn.append(item);
+                pony.wornSlots |= wearablePositionsMap[item.id];
             }
+        }
 
-            // make sure the player has all quests (otherwise NPC refuse to talk)
-            for (int j=0; j<Quest::quests.size(); j++)
-            {
-                Quest quest = Quest::quests[j];
-                quest.setOwner(player);
-                pony.quests << quest;
-            }
+        // make sure the player has all quests (otherwise NPC refuse to talk)
+        for (int j=0; j<Quest::quests.size(); j++)
+        {
+            Quest quest = Quest::quests[j];
+            quest.setOwner(player);
+            pony.quests << quest;
+        }
 
-            // read quests
-             QDomElement DomQuests = n.firstChildElement("quests");
-             QDomNodeList DomQuestList = DomQuests.elementsByTagName("quest");
-             for (int j = 0; j < DomQuestList.size(); j++)
+        // read quests
+         QDomElement DomQuests = n.firstChildElement("quests");
+         QDomNodeList DomQuestList = DomQuests.elementsByTagName("quest");
+         for (int j = 0; j < DomQuestList.size(); j++)
+         {
+             if(DomQuestList.item(j).isElement())
              {
-                 if(DomQuestList.item(j).isElement())
+                 QDomElement DomQuest = DomQuestList.item(j).toElement();
+                 for (int k=0; k<pony.quests.size(); k++)
                  {
-                     QDomElement DomQuest = DomQuestList.item(j).toElement();                     
-                     for (int k=0; k<pony.quests.size(); k++)
+                     if (pony.quests[k].id == DomQuest.attribute("id").toInt())
                      {
-                         if (pony.quests[k].id == DomQuest.attribute("id").toInt())
-                         {
-                             pony.quests[k].state = DomQuest.attribute("state").toInt();
-                             logMessage(QObject::tr("found %1 Quest ID %2 State: %3").arg(pony.name).arg(pony.quests[k].id).arg(pony.quests[k].state));
-                             break;
-                         }
+                         pony.quests[k].state = DomQuest.attribute("state").toInt();
+                         logMessage(QObject::tr("found %1 Quest ID %2 State: %3").arg(pony.name).arg(pony.quests[k].id).arg(pony.quests[k].state));
+                         break;
                      }
                  }
              }
+         }
 
-            ponies << pony;
-        }
+        ponies << pony;
+    }
 
-        xmlfile.close();
-    } // end parse xml
-
-    else // if no xml file exists, parse dat file
-    {
-        QFile file(QDir::currentPath()+"/data/players/"+player->name.toLatin1()+"/ponies.dat");
-        if (!file.open(QIODevice::ReadOnly))
-            return ponies;
-
-        QByteArray data = file.readAll();
-        file.close();
-
-        int i=0;
-        while (i<data.size())
-        {
-            Pony pony{player};
-            // Read the ponyData
-            unsigned strlen;
-            unsigned lensize=0;
-            {
-                unsigned char num3; int num=0, num2=0;
-                do {
-                    num3 = data[i+lensize]; lensize++;
-                    num |= (num3 & 0x7f) << num2;
-                    num2 += 7;
-                } while ((num3 & 0x80) != 0);
-                strlen = (uint) num;
-            }
-            int ponyDataSize = strlen+lensize+PONYDATA_SIZE;
-            pony.ponyData = data.mid(i,ponyDataSize);
-            pony.name = dataToString(pony.ponyData); // The name is the first elem
-            //app.logMessage("Found pony : "+pony.name);
-            i+=ponyDataSize;
-
-            // Read pos
-            UVector pos = dataToVector(data.mid(i,12));
-            pony.pos = pos;
-            i+=12;
-
-            // Read sceneName
-            unsigned strlen2;
-            unsigned lensize2=0;
-            {
-                unsigned char num3; int num=0, num2=0;
-                do {
-                    num3 = data[i+lensize2]; lensize2++;
-                    num |= (num3 & 0x7f) << num2;
-                    num2 += 7;
-                } while ((num3 & 0x80) != 0);
-                strlen2 = (uint) num;
-            }
-            pony.sceneName = data.mid(i+lensize2, strlen2).toLower();
-            i+=strlen2+lensize2;
-
-            // Create quests
-            for (int i=0; i<Quest::quests.size(); i++)
-            {
-                Quest quest = Quest::quests[i];
-                quest.setOwner(player);
-                pony.quests << quest;
-            }
-            pony.accessLvl = 1;
-
-            ponies << pony;
-        }
-    } // end parse dat file
-
+    xmlfile.close();
     return ponies;
-}
+} // end parse xml
 
 void Pony::saveQuests(QList<QString> ponyNames)
 {
@@ -396,11 +404,6 @@ void Pony::saveQuests(QList<QString> ponyNames)
 
 void Pony::loadQuests()
 {
-    // skip if xml file exists
-    QFileInfo poniesXml(QDir::currentPath()+"/data/players/"+owner->name.toLatin1()+"/ponies.xml");
-    if (poniesXml.exists() && poniesXml.isFile())
-        return;
-
     logMessage(QObject::tr("UDP: Loading quests for %1 (%2)").arg(owner->name).arg(this->name));
 
     QDir playerPath(QDir::currentPath());
@@ -515,11 +518,6 @@ bool Pony::loadInventory()
     playerPath.cd("data");
     playerPath.cd("players");
     playerPath.mkdir(owner->name.toLatin1());
-
-    // skip if xml file exists
-    QFileInfo poniesXml(QDir::currentPath()+"/data/players/"+owner->name.toLatin1()+"/ponies.xml");
-    if (poniesXml.exists() && poniesXml.isFile())
-        return true;
 
     QFile file(QDir::currentPath()+"/data/players/"+owner->name.toLatin1()+"/inventory.dat");
     logMessage(QObject::tr("UDP: Loading inventory for %1 (%2)").arg(owner->name).arg(this->name));

@@ -431,6 +431,26 @@ void App::sendCmdLine()
         }
         logError(QObject::tr("Error: Destination peer does not exist!"));
     }
+    else if (str.startsWith("Ponies2xml", Qt::CaseInsensitive))
+    {
+        for (int i=0; i<Player::tcpPlayers.size(); i++)
+        {
+            Player* p = Player::tcpPlayers[i];
+            logMessage(QObject::tr("Converting ponies for user %1").arg(p->name));
+            QList<Pony> ponies = Player::loadPoniesDat(p);
+            for (int i=0; i<ponies.size(); i++)
+            {
+                ponies[i].loadQuests();
+                logMessage(QObject::tr("%1: found %2 quests").arg(ponies[i].name).arg(ponies[i].quests.size()));
+                ponies[i].loadInventory();
+                logMessage(QObject::tr("%1: found %2 inventory items and %3 bits").arg(ponies[i].name).arg(ponies[i].inv.size()).arg(ponies[i].nBits));
+            }
+            if (ponies.size() >= 1)
+                Player::savePonies(p, ponies);
+            else
+                logError(QObject::tr("No ponies found for user %1").arg(p->name));
+        }
+    }
     if (cmdPeer->IP=="")
     {
         logError(QObject::tr("Select a peer first with setPeer/listPeers"));

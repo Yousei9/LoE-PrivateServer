@@ -71,6 +71,7 @@ public:
     Player();
     ~Player();
     static void savePonies(Player* player,QList<Pony> ponies);
+    static QList<Pony> loadPoniesDat(Player *player);
     static QList<Pony> loadPonies(Player *player);
     static bool savePlayers(QList<Player*>& playersData);
     static QList<Player*> loadPlayers();
