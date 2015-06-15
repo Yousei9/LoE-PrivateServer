@@ -79,8 +79,7 @@ void Player::savePonies(Player *player, QList<Pony> ponies)
 
     QDir playerPath(QDir::currentPath());
     playerPath.cd("data");
-    playerPath.cd("players");
-    playerPath.mkdir(player->name.toLatin1());
+    playerPath.cd("players");    
 
     // save in xml format
     QFile xmlfile(QDir::currentPath()+"/data/players/"+player->name.toLatin1()+".xml");
@@ -336,7 +335,7 @@ QList<Pony> Player::loadPonies(Player* player)
                      if (pony.quests[k].id == DomQuest.attribute("id").toInt())
                      {
                          pony.quests[k].state = DomQuest.attribute("state").toInt();
-                         logMessage(QObject::tr("found %1 Quest ID %2 State: %3").arg(pony.name).arg(pony.quests[k].id).arg(pony.quests[k].state));
+                         //logMessage(QObject::tr("found %1 Quest ID %2 State: %3").arg(pony.name).arg(pony.quests[k].id).arg(pony.quests[k].state));
                          break;
                      }
                  }

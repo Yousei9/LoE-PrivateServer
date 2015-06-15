@@ -540,21 +540,13 @@ void App::stopGameServer(bool log)
     //logMessage(tr("UDP: Disconnecting all players"));
     disconnectUdpPlayers();
 
+    sync->stopSync();
     pingTimer->stop();
 
     for (int i=0;i<tcpClientsList.size();i++)
         tcpClientsList[i].first->close();
 
     udpSocket->close();
-
-    sync->stopSync();
-
-    for (int i=0; i<Quest::quests.size(); i++)
-    {
-        delete Quest::quests[i].commands;
-        delete Quest::quests[i].name;
-        delete Quest::quests[i].descr;
-    }
 
     Quest::quests.clear();
     Quest::npcs.clear();

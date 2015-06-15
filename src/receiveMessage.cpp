@@ -299,13 +299,6 @@ void receiveMessage(Player* player)
             pony.netviewId = player->pony.netviewId;
             player->pony = pony;
 
-           /* player->pony.loadQuests();
-            if (!player->pony.loadInventory()) // Create a default inventory if we can't find one saved
-            {
-                player->pony.nBits = 15;
-//                player->pony.saveInventory(); // happens on logout/disconnect anyway
-            }*/
-
             Player::savePonies(player, ponies);
 
             // Send instantiate to the players of the new scene

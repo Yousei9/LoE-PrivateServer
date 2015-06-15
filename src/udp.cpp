@@ -172,5 +172,6 @@ void disconnectUdpPlayers()
         // Free
         delete player;
         Player::udpPlayers.removeFirst();
+        app.ui->userCountLabel->setText(QString("%1 / %2").arg(Player::udpPlayers.size()).arg(maxConnected));
     }
 }

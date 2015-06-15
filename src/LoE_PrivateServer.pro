@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 TARGET = LoE_PrivateServer
-VERSION = 0.5.6
+VERSION = 0.5.7
 
 QT       += core network
 QT       += xml
