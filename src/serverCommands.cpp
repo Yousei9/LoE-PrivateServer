@@ -423,7 +423,7 @@ void App::sendCmdLine()
             {
                 logMessage(QObject::tr("UDP: Teleported %1 to %2").arg(sourcePeer->pony.name,Player::udpPlayers[i]->pony.name));
                 if (Player::udpPlayers[i]->pony.sceneName.toLower() != sourcePeer->pony.sceneName.toLower())
-                    sendLoadSceneRPC(sourcePeer, Player::udpPlayers[i]->pony.sceneName, Player::udpPlayers[i]->pony.pos);
+                    sendLoadSceneRPC(sourcePeer, Player::udpPlayers[i]->pony.sceneName, Player::udpPlayers[i]->pony.pos, Player::udpPlayers[i]->pony.rot);
                 else
                     sendMove(sourcePeer, Player::udpPlayers[i]->pony.pos.x, Player::udpPlayers[i]->pony.pos.y, Player::udpPlayers[i]->pony.pos.z);
                 return;

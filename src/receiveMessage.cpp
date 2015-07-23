@@ -302,7 +302,7 @@ void receiveMessage(Player* player)
             Player::savePonies(player, ponies);
 
             // Send instantiate to the players of the new scene
-            sendLoadSceneRPC(player, player->pony.sceneName, player->pony.pos);
+            sendLoadSceneRPC(player, player->pony.sceneName, player->pony.pos, player->pony.rot);
 
             //Send the 46s init messages
             //app.logMessage(QString("UDP: Sending the 46 init messages"));
@@ -318,7 +318,7 @@ void receiveMessage(Player* player)
                 if (vortex.destName.isEmpty())
                     logError(QObject::tr("Can't find vortex %1 on map %2").arg(id).arg(player->pony.sceneName));
                 else
-                    sendLoadSceneRPC(player, vortex.destName, vortex.destPos);
+                    sendLoadSceneRPC(player, vortex.destName, vortex.destPos, vortex.destRot);
             }
         }
         else if ((unsigned char)msg[0]==MsgUserReliableOrdered4 && (unsigned char)msg[5]==0x2) // Delete pony request
@@ -568,6 +568,49 @@ void receiveMessage(Player* player)
             //app.logMessage("UDP: Resuming script with answer "+QString().setNum(answer)
             //               +" for quest "+QString().setNum(player->pony.lastQuest));
             player->pony.quests[player->pony.lastQuest].processAnswer(answer);
+        }
+        else if ((unsigned char)msg[0]==MsgUserReliableOrdered4 && (unsigned char)msg[5]==0x14) // Friend Request
+        {
+            quint8 targetPlayerId = (quint8)msg[10];
+            QString targetPlayer = "not found";
+
+            //get name
+            for (int i=0; i<Player::udpPlayers.size();i++)
+            {
+                if (Player::udpPlayers[i]->pony.id == targetPlayerId)
+                    targetPlayer = Player::udpPlayers[i]->name;
+
+            }
+
+            logMessage(QObject::tr("UDP: Friend request received : %1(%2) -> %3(%4)")
+                       .arg(player->name)
+                       .arg(player->pony.id)
+                       .arg(targetPlayer)
+                       .arg(targetPlayerId));
+
+            //msgSize=0;
+        }
+        else if ((unsigned char)msg[0]==MsgUserReliableOrdered4 && (unsigned char)msg[5]==0xcf) // Player Report
+        {
+            QByteArray reportText = msg.right((quint8)msg[9]);
+            quint8 targetPlayerId = (quint8)msg[7];
+            QString targetPlayer = "not found";
+
+            //get name
+            for (int i=0; i<Player::udpPlayers.size();i++)
+            {
+                if (Player::udpPlayers[i]->pony.id == targetPlayerId)
+                    targetPlayer = Player::udpPlayers[i]->name;
+
+            }
+
+            logMessage(QObject::tr("UDP: Player %1(%2) reported %3(%4):\n%5")
+                       .arg(player->name)
+                       .arg(player->pony.id)
+                       .arg(targetPlayer)
+                       .arg(targetPlayerId)
+                       .arg(reportText.data()));
+            //msgSize=0;
         }
         else
         {

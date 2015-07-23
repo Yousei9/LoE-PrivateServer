@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene name="RaritysBoutique">
+	<vortex>
+		<id>00</id>
+		<name>RaritysBoutique</name>
+		<pos x="29.586" y="-1.15" z="-60.497"/>
+		<rot x="0" y="-0.25" z="0" w="1"/>
+	</vortex>
+	<vortex>
+		<id>01</id>
+		<name>PonyVille</name>
+		<pos x="51.101" y="-173.934" z="51.51"/>
+		<rot x="0" y="-0.32" z="0" w="1"/>
+	</vortex>	
+</scene>

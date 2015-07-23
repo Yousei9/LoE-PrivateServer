@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene name="Zecoras">
+	<vortex>
+		<id>00</id>
+		<name>Zecoras</name>
+		<pos x="-205.0" y="0.0" z="1.271"/>
+		<rot x="00" y="00" z="00"/>
+	</vortex>
+	<vortex>
+		<id>02</id>
+		<name>Everfree3</name>
+		<pos x="-323.5" y="52.0" z="-407.6"/>
+		<rot x="00" y="00" z="00"/>
+	</vortex>	
+</scene>

@@ -497,14 +497,15 @@ bool sendLoadSceneRPC(Player* player, QString sceneName) // Loads a scene and se
         logError(QObject::tr("UDP: Scene not in vortex DB. Aborting scene load."));
         return false;
     }
-    return sendLoadSceneRPC(player, sceneName, vortex.destPos);
+    return sendLoadSceneRPC(player, sceneName, vortex.destPos, vortex.destRot);
 }
 
-bool sendLoadSceneRPC(Player* player, QString sceneName, UVector pos) // Loads a scene and send to the given pos
+bool sendLoadSceneRPC(Player* player, QString sceneName, UVector pos, UQuaternion rot) // Loads a scene and send to the given pos
 {
-    logMessage(QString(QString("UDP: Loading scene \"%1\" to %2 at %3 %4 %5")
+    logMessage(QString(QString("UDP: Loading scene \"%1\" to %2 at pos %3 %4 %5 rot %6 %7 %8 %9")
                            .arg(sceneName).arg(player->pony.netviewId)
-                           .arg(pos.x).arg(pos.y).arg(pos.z)));
+                           .arg(pos.x).arg(pos.y).arg(pos.z)
+                           .arg(rot.x).arg(rot.y).arg(rot.z).arg(rot.w)));
 
     Scene* scene = findScene(sceneName);
     Scene* oldScene = findScene(player->pony.sceneName);
@@ -519,6 +520,7 @@ bool sendLoadSceneRPC(Player* player, QString sceneName, UVector pos) // Loads a
     levelLoadMutex.lock();
     player->inGame = 1;
     player->pony.pos = pos;
+    player->pony.rot = rot;
     player->pony.sceneName = sceneName.toLower();
     player->lastValidReceivedAnimation.clear(); // Changing scenes resets animations
     Player::removePlayer(oldScene->players, player->IP, player->port);

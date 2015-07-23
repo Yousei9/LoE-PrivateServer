@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene name="PonyVille">
+	<vortex>
+		<id>00</id>
+		<name>PonyVille</name>
+		<pos x="-3.80378" y="-195.301" z="176.69"/>
+		<rot x="0" y="0" z="0"/>
+	</vortex>
+	<vortex>
+		<id>02</id>
+		<name>GemMines</name>
+		<pos x="45.192" y="9.177" z="-63.527"/>
+		<rot x="0" y="0" z="0" w="0"/>
+	</vortex>
+	<vortex>
+		<id>03</id>
+		<name>Canterlot</name>
+		<pos x="-57.108" y="9.660" z="-182.363"/>
+		<rot x="0" y="0" z="0"/>
+	</vortex>
+	<vortex>
+		<id>04</id>
+		<name>Everfree3</name>
+		<pos x="304.822" y="17.5" z="-442.776"/>
+		<rot x="0" y="0" z="0"/>
+	</vortex>
+	<vortex>
+		<id>07</id>
+		<name>Everfree1</name>
+		<pos x="57.8769" y="0.202561" z="-660.936"/>
+		<rot x="0" y="0" z="0"/>
+	</vortex>
+	<vortex>
+		<id>08</id>
+		<name>SweetAppleAcres</name>
+		<pos x="59.98" y="-110.12" z="55.72"/>
+		<rot x="0" y="-3.5" z="0" w="0"/>
+	</vortex>
+	<vortex>
+		<id>09</id>
+		<name>Ponyville Library 1st floor</name>
+		<pos x="-267.45" y="-199.75" z="265.95"/>
+		<rot x="0" y="-1.0" z="0" w="1"/>
+	</vortex>
+	<vortex>
+		<id>14</id>
+		<name>SugarCubeCorner</name>
+		<pos x="6.75" y="-0.05" z="1.62"/>
+		<rot x="0" y="-3.25" z="0" w="0"/>
+	</vortex>
+	<vortex>
+		<id>0a</id>
+		<name>RaritysBoutique</name>
+		<pos x="29.586" y="-1.15" z="-60.497"/>
+		<rot x="0" y="-0.25" z="0" w="1"/>
+	</vortex>	
+</scene>

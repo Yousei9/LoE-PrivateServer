@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene name="Appaloosa">
+	<vortex>
+		<id>00</id>
+		<name>Appaloosa</name>
+		<pos x="889.554" y="0" z="1.26232"/>
+		<rot x="00" y="00" z="00"/>
+	</vortex>
+	<vortex>
+		<id>01</id>
+		<name>PonyVille</name>
+		<pos x="-28.526" y="-195.304" z="602.412"/>
+		<rot x="00" y="00" z="00"/>
+	</vortex>	
+</scene>

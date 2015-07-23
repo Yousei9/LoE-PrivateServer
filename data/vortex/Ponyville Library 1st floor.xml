@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene name="Ponyville Library 1st floor">
+	<vortex>
+		<id>00</id>
+		<name>Ponyville Library 1st floor</name>
+		<pos x="-267.45" y="-199.75" z="265.95"/>
+		<rot x="0" y="-1.0" z="0" w="1"/>
+	</vortex>
+	<vortex>
+		<id>01</id>
+		<name>PonyVille</name>
+		<pos x="36.736" y="-195.304" z="411.459"/>
+		<rot x="0" y="-3.5" z="0" w="0"/>
+	</vortex>	
+	<vortex>
+		<id>02</id>
+		<name>Ponyville Library 2nd floor</name>
+		<pos x="4.17646" y="-178.607" z="293.314"/>
+		<rot x="0" y="0" z="0" w="0"/>
+	</vortex>
+</scene>

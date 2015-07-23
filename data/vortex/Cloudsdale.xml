@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene name="Cloudsdale">
+	<vortex>
+		<id>00</id>
+		<name>Cloudsdale</name>
+		<pos x="17.830" y="46.460" z="101.950"/>
+		<rot x="00" y="00" z="00"/>
+	</vortex>
+	<vortex>
+		<id>01</id>
+		<name>Canterlot</name>
+		<pos x="593.299" y="125" z="-91.5071"/>
+		<rot x="00" y="00" z="00"/>
+	</vortex>
+</scene>

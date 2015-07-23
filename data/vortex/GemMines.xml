@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene name="GemMines">
+	<vortex>
+		<id>00</id>
+		<name>GemMines</name>
+		<pos x="45.192" y="9.177" z="-63.527"/>
+		<rot x="0" y="0" z="0" w="0"/>
+	</vortex>
+	<vortex>
+		<id>03</id>
+		<name>PonyVille</name>
+		<pos x="-135.361" y="-195.303" z="380.023"/>
+		<rot x="0" y="-3.5" z="0" w="0"/>
+	</vortex>	
+</scene>

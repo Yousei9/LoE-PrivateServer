@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene name="Cottage">
+	<vortex>
+		<id>00</id>
+		<name>Cottage</name>
+		<pos x="00" y="00" z="00"/>
+		<rot x="00" y="00" z="00"/>
+	</vortex>
+</scene>

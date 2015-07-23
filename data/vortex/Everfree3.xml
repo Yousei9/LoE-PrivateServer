@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene name="Everfree3">
+	<vortex>
+		<id>00</id>
+		<name>Everfree3</name>
+		<pos x="304.822" y="17.5" z="-442.776"/>
+		<rot x="00" y="00" z="00"/>
+	</vortex>
+	<vortex>
+		<id>01</id>
+		<name>PonyVille</name>
+		<pos x="-210.85" y="-195.304" z="81.9897"/>
+		<rot x="00" y="00" z="00"/>
+	</vortex>	
+	<vortex>
+		<id>02</id>
+		<name>Zecoras</name>
+		<pos x="-200.0" y="0.0" z="4.0"/>
+		<rot x="00" y="00" z="00"/>
+	</vortex>	
+	<vortex>
+		<id>03</id>
+		<name>Everfree1</name>
+		<pos x="622.743" y="24.752" z="-294.289"/>
+		<rot x="00" y="00" z="00"/>
+	</vortex>	
+</scene>

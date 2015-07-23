@@ -16,6 +16,7 @@ public:
     quint8 id;
     QString destName;
     UVector destPos;
+    UQuaternion destRot;
 };
 
 class Scene
@@ -34,5 +35,6 @@ public:
 Scene* findScene(QString sceneName);
 Vortex findVortex(QString sceneName, quint8 id);
 Vortex findVortex(Scene* scene, quint8 id);
+bool ReadVortxXml(QString file);
 
 #endif // SCENE_H

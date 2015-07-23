@@ -33,7 +33,7 @@ void App::startup()
     ui->retranslateUi(this);
 #endif
 
-    logStatusMessage(QString("%1 v%2.%3").arg(APP_NAME).arg(APP_VERSION).arg(BUILD));
+    logStatusMessage(QString("%1 v%2 (b%3)").arg(APP_NAME).arg(APP_VERSION).arg(BUILD));
 
     app.loginServerUp = false;
     app.gameServerUp = false;
@@ -62,7 +62,7 @@ void App::startup()
     int connectedPlayers = Player::udpPlayers.length();
     app.ui->userCountLabel->setText(QString("%1 / %2").arg(connectedPlayers).arg(maxConnected));
     app.ui->builddateLabel->setText(tr("Built %1").arg(BUILDDATE));
-    app.ui->versionLabel->setText(QString("v%1<font size=14pt>.%2</font>").arg(APP_VERSION).arg(BUILD));
+    app.ui->versionLabel->setText(QString("v%1 <font size=14pt>(b%2)</font>").arg(APP_VERSION).arg(BUILD));
 
     connect(app.ui->sendButton, SIGNAL(clicked()), this, SLOT(sendCmdLine()));
     connect(app.ui->cmdLine, SIGNAL(returnPressed()), this, SLOT(sendCmdLine()));
@@ -315,7 +315,10 @@ void App::startGameServer()
     }
 
     SceneEntity::lastNetviewId=0;
-    SceneEntity::lastId=1;
+    SceneEntity::lastId=0;
+    for (int i=0; i < 65536; i++) {
+        SceneEntity::usedids[i] = false;
+    }
 
     /// Init
     tcpClientsList.clear();
@@ -327,55 +330,8 @@ void App::startGameServer()
     int nVortex=0;
     for (int i=0; i<files.size(); i++) // For each vortex file
     {
-        // Each file is a scene
-        Scene scene(files[i].split('.')[0]);
-
-        QFile file("data/vortex/"+files[i]);
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            logStatusError(tr("Error reading vortex DB"));
-            return;
-        }
-        QByteArray data = file.readAll();
-        data.replace('\r', "");
-        QList<QByteArray> lines = data.split('\n');
-
-        // Each line is a vortex
-        for (int j=0; j<lines.size(); j++)
-        {
-            if (lines[j].size() == 0) // Skip empty lines
-                continue;
-            nVortex++;
-            Vortex vortex;
-            bool ok1, ok2, ok3, ok4;
-            QList<QByteArray> elems = lines[j].split(' ');
-            if (elems.size() < 5)
-            {
-                logStatusError(tr("Vortex DB is corrupted. Incorrect line (%1 elems), file %2")
-                                    .arg(elems.size()).arg(files[i]));
-                corrupted=true;
-                break;
-            }
-            vortex.id = elems[0].toInt(&ok1, 16);
-            vortex.destName = elems[1];
-            for (int j=2; j<elems.size() - 3;j++) // Concatenate the string between id and poss
-                vortex.destName += " "+elems[j];
-            vortex.destPos.x = elems[elems.size()-3].toFloat(&ok2);
-            vortex.destPos.y = elems[elems.size()-2].toFloat(&ok3);
-            vortex.destPos.z = elems[elems.size()-1].toFloat(&ok4);
-            if (!(ok1&&ok2&&ok3&&ok4))
-            {
-                logStatusError(tr("Vortex DB is corrupted. Conversion failed, file %1").arg(files[i]));
-                corrupted=true;
-                break;
-            }
-            scene.vortexes << vortex;
-            //app.logMessage("Add vortex "+QString().setNum(vortex.id)+" to "+vortex.destName+" "
-            //               +QString().setNum(vortex.destPos.x)+" "
-            //               +QString().setNum(vortex.destPos.y)+" "
-            //               +QString().setNum(vortex.destPos.z));
-        }
-        Scene::scenes << scene;
+        if (!ReadVortxXml(vortexDir.absolutePath() + "/" + files[i]))
+            corrupted = true;
     }
 
     if (corrupted)
@@ -384,6 +340,10 @@ void App::startGameServer()
         return;
     }
 
+    for (int i=0; i<Scene::scenes.size(); i++)
+    {
+        nVortex += Scene::scenes[i].vortexes.size();
+    }
     logMessage(tr("Loaded %1 vortexes in %2 scenes").arg(nVortex).arg(Scene::scenes.size()));
 
     /// Read/parse Items.xml
@@ -407,7 +367,7 @@ void App::startGameServer()
         unsigned nQuests = 0;
         QDir npcsDir("data/npcs/");
         QStringList files = npcsDir.entryList(QDir::Files);
-        for (int i=0; i<files.size(); i++, nQuests++) // For each vortex file
+        for (int i=0; i<files.size(); i++, nQuests++) // For each NPC file
         {
             try
             {

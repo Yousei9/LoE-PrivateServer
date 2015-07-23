@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene name="Canterlot">
+	<vortex>
+		<id>00</id>
+		<name>Canterlot</name>
+		<pos x="-57.108" y="10" z="-182.363"/>
+		<rot x="00" y="00" z="00"/>
+	</vortex>
+	<vortex>
+		<id>01</id>
+		<name>PonyVille</name>
+		<pos x="-28.526" y="-195.304" z="602.412"/>
+		<rot x="00" y="00" z="00"/>
+	</vortex>
+	<vortex>
+		<id>03</id>
+		<name>Cloudsdale</name>
+		<pos x="-600.0" y="192.6" z="-309.6"/>
+		<rot x="00" y="00" z="00"/>
+	</vortex>	
+</scene>

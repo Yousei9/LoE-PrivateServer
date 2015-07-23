@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene name="SugarCubeCorner">
+	<vortex>
+		<id>00</id>
+		<name>SugarCubeCorner</name>
+		<pos x="6.75" y="-0.05" z="1.62"/>
+		<rot x="0" y="-3.25" z="0" w="0"/>
+	</vortex>
+	<vortex>
+		<id>02</id>
+		<name>PonyVille</name>
+		<pos x="-4.768" y="-195.303" z="346.021"/>
+		<rot x="0" y="3.25" z="0" w="0"/>
+	</vortex>	
+</scene>
