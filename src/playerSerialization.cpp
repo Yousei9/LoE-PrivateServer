@@ -109,6 +109,12 @@ void Player::savePonies(Player *player, QList<Pony> ponies)
                 xmlWriter.writeAttribute("y", QString::number(ponies[i].pos.y));
                 xmlWriter.writeAttribute("z", QString::number(ponies[i].pos.z));
             xmlWriter.writeEndElement();
+            xmlWriter.writeStartElement("rot");
+                xmlWriter.writeAttribute("x", QString::number(ponies[i].rot.x));
+                xmlWriter.writeAttribute("y", QString::number(ponies[i].rot.y));
+                xmlWriter.writeAttribute("z", QString::number(ponies[i].rot.z));
+                xmlWriter.writeAttribute("w", "1");
+            xmlWriter.writeEndElement();
             xmlWriter.writeTextElement("scene", ponies[i].sceneName.toLower());
 
             // write inventory
@@ -254,6 +260,7 @@ QList<Pony> Player::loadPonies(Player* player)
         QDomElement DomAccess = n.firstChildElement("accesslevel");
         QDomElement DomScene = n.firstChildElement("scene");
         QDomElement DomPos = n.firstChildElement("pos");
+        QDomElement DomRot = n.firstChildElement("rot");
 
         if (DomName.isNull() || DomPonyData.isNull() || DomAccess.isNull() || DomScene.isNull() || DomPos.isNull() )
             continue;
@@ -263,9 +270,15 @@ QList<Pony> Player::loadPonies(Player* player)
         pony.name = dataToString(pony.ponyData);
         pony.accessLvl = DomAccess.text().toUInt();
         pony.sceneName = DomScene.text();
+
         pony.pos.x = DomPos.attribute("x").toFloat();
         pony.pos.y = DomPos.attribute("y").toFloat();
         pony.pos.z = DomPos.attribute("z").toFloat();
+
+        pony.rot.x = DomRot.attribute("x","0").toFloat();
+        pony.rot.y = DomRot.attribute("y","0").toFloat();
+        pony.rot.z = DomRot.attribute("z","0").toFloat();
+        pony.rot.w = DomRot.attribute("w","0").toFloat();
 
         //logMessage(QObject::tr("found pony %1, access lvl: %2").arg(pony.name).arg(pony.accessLvl));
 
