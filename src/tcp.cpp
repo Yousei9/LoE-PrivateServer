@@ -328,9 +328,21 @@ void App::tcpProcessData(QByteArray data, QTcpSocket* socket)
             logMessage(tr("Username : %1").arg(username));
             logMessage(tr("Passhash : %1","A cryptographic hash of a password").arg(passhash));
 
+            // check if playername contains illegal characters
+            // regex checked with https://regex101.com/r/vS7vZ3/11
+            QRegularExpression re("^(?!\\s)([\\w\\s\\-]+)+$");
+            QRegularExpressionMatch match = re.match(username);
+            if (!match.hasMatch())
+            {
+                logMessage(tr("TCP: Login failed, illegal characters in username"));
+                socket->write(fileBadPassword.readAll());
+                socket->close();
+                return;
+            }
+
             // Add player to the players list
             Player* player = Player::findPlayer(Player::tcpPlayers, username);
-            if (player->name != username) // Not found, create a new player
+            if (player->name.toLower() != username.toLower()) // Not found, create a new player
             {
                 // Check max registered number
                 if (Player::tcpPlayers.size() >= maxRegistered)

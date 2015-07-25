@@ -136,7 +136,7 @@ Player* Player::findPlayer(QList<Player*>& players, QString uname)
 {
     for (int i=0; i<players.size(); i++)
     {
-        if (players[i]->name == uname)
+        if (players[i]->name.toLower() == uname.toLower())
             return players[i];
     }
 
