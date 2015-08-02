@@ -385,11 +385,15 @@ void App::tcpProcessData(QByteArray data, QTcpSocket* socket)
             if (ok) // Send servers list
             {
                 // HTTP reply template
-                static const QByteArray data1 = QByteArray::fromHex("0D0A61757468726573706F6E73653A0A747275650A");
-                //static const QByteArray data2 = QByteArray::fromHex("0A310A");
-                QString d2 = QString("%1%2%3").arg("0A3").arg(player->accessLvl).arg("0A");
-                static const QByteArray data2 = QByteArray::fromHex(d2.toLatin1());
-                static const QByteArray data3 = QByteArray::fromHex("0D0A300D0A0D0A");
+                QByteArray data1 = QByteArray::fromHex("0D0A61757468726573706F6E73653A0A747275650A");
+                QByteArray data2 = QByteArray::fromHex("0A310A");
+                if(player->accessLvl == 2)
+                    data2 = QByteArray::fromHex("0A320A");
+                if(player->accessLvl == 3)
+                    data2 = QByteArray::fromHex("0A330A");
+                if(player->accessLvl == 4)
+                    data2 = QByteArray::fromHex("0A340A");
+                QByteArray data3 = QByteArray::fromHex("0D0A300D0A0D0A");
 
                 QByteArray customData = file.readAll();
                 QByteArray sesskey = QCryptographicHash::hash(QString(passhash + saltPassword).toLatin1(), QCryptographicHash::Md5).toHex();
