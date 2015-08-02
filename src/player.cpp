@@ -38,7 +38,6 @@ Pony::Pony(Player *Owner)
     name = "";
     wornSlots = 0;
     health = maxHealth;
-    accessLvl = 0;
 }
 
 Pony::type Pony::getType()
@@ -63,6 +62,7 @@ Player::Player()
 {
     connected=false;
     inGame=0;
+    accessLvl=0;
     nReceivedDups=0;
     lastPingNumber=0;
     lastPingTime=timestampNow();
@@ -179,6 +179,19 @@ void Player::removePlayer(QList<Player*>& players, QString uIP, quint16 uport)
     int connectedPlayers = Player::udpPlayers.length();
     app.ui->userCountLabel->setText(QString("%1 / %2").arg(connectedPlayers).arg(Settings::maxConnected));
 #endif
+}
+
+void Player::updatePlayer(QList<Player*>& players, Player* player)
+{
+    for (int i=0; i<players.length(); i++)
+    {
+        if (players[i]->name.toLower() == player->name.toLower())
+        {
+            // sync only relevant attributes
+            players[i]->lastOnline = player->lastOnline;
+            players[i]->accessLvl = player->accessLvl;
+        }
+    }
 }
 
 void Player::disconnectPlayerCleanup(Player* player)

@@ -59,7 +59,6 @@ public:
     bool dead; // If true, the player is in the room, but not instantiated
     float maxHealth;
     float defense;
-    quint8 accessLvl;
 };
 
 class Player : QObject
@@ -71,14 +70,16 @@ public:
     Player();
     ~Player();
     static void savePonies(Player* player,QList<Pony> ponies);
-    static QList<Pony> loadPoniesDat(Player *player);
     static QList<Pony> loadPonies(Player *player);
+    static QList<Pony> loadPoniesDat(Player *player);
     static bool savePlayers(QList<Player*>& playersData);
     static QList<Player*> loadPlayers();
+    static QList<Player*> loadPlayersDat();
     static Player* findPlayer(QList<Player*>& players, QString uname);
     static Player* findPlayer(QList<Player*>& players, QString uIP, quint16 uport);
     static Player* findPlayer(QList<Player*>& players, quint16 netviewId);
     static void removePlayer(QList<Player*>& players, QString uIP, quint16 uport);
+    static void updatePlayer(QList<Player*>& players, Player* player);
     static void disconnectPlayerCleanup(Player* player);
 
 public slots:
@@ -94,8 +95,10 @@ public:
     quint16 port;
     QString name;
     QString passhash;
+    quint8 accessLvl;
     float lastPingTime;
     int lastPingNumber;
+    QDateTime lastOnline; // timestamp in utc of last login
     bool connected;
     quint16 udpSequenceNumbers[33]; // Next seq number to use when sending a message
     quint16 udpRecvSequenceNumbers[33]; // Last seq number received

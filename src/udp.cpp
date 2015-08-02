@@ -87,11 +87,13 @@ void udpProcessPendingDatagrams()
                         sendMessage(newPlayer, MsgDisconnect, "Error : Too many players connected. Try again later.");
                     }
                     else
+                    {
                         // If not add the player
                         Player::udpPlayers << newPlayer;
+                    }
 #ifdef USE_GUI
-                        int connectedPlayers = Player::udpPlayers.length();
-                        app.ui->userCountLabel->setText(QString("%1 / %2").arg(connectedPlayers).arg(maxConnected));
+                    int connectedPlayers = Player::udpPlayers.length();
+                    app.ui->userCountLabel->setText(QString("%1 / %2").arg(connectedPlayers).arg(maxConnected));
 #endif
                 }
                 else  // IP:Port found in player list
@@ -132,6 +134,10 @@ void udpProcessPendingDatagrams()
         Player* player = Player::findPlayer(Player::udpPlayers, rAddr.toString(), rPort);
         if (player->IP == rAddr.toString() && player->port == rPort) // Process data
         {
+            Player *tcpPlayer = Player::findPlayer(Player::tcpPlayers, player->name); // sync player attributes from login server playerDB
+            if(tcpPlayer->name.toLower() == player->name.toLower())
+                Player::updatePlayer(Player::udpPlayers, tcpPlayer);
+
             player->receivedDatas->append(datagram);
             receiveMessage(player);
         }

@@ -9,7 +9,7 @@
 void receiveChatMessage(QByteArray msg, Player* player)
 {
     QString author = player->pony.name;
-    quint8 accessLevel = player->pony.accessLvl;
+    quint8 accessLevel = player->accessLvl;
     quint8 accessServer = 0;
     quint8 channel = (quint8)msg[6];
     int msgIndex = 7;

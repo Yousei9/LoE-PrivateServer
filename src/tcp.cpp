@@ -332,9 +332,9 @@ void App::tcpProcessData(QByteArray data, QTcpSocket* socket)
             // regex checked with https://regex101.com/r/vS7vZ3/11
             QRegularExpression re("^(?!\\s)([\\w\\s\\-]+)+$");
             QRegularExpressionMatch match = re.match(username);
-            if (!match.hasMatch())
+            if (!match.hasMatch() || username.toLower() == "players")
             {
-                logMessage(tr("TCP: Login failed, illegal characters in username"));
+                logMessage(tr("TCP: Login failed, invalid username"));
                 socket->write(fileBadPassword.readAll());
                 socket->close();
                 return;
@@ -386,7 +386,9 @@ void App::tcpProcessData(QByteArray data, QTcpSocket* socket)
             {
                 // HTTP reply template
                 static const QByteArray data1 = QByteArray::fromHex("0D0A61757468726573706F6E73653A0A747275650A");
-                static const QByteArray data2 = QByteArray::fromHex("0A310A");
+                //static const QByteArray data2 = QByteArray::fromHex("0A310A");
+                QString d2 = QString("%1%2%3").arg("0A3").arg(player->accessLvl).arg("0A");
+                static const QByteArray data2 = QByteArray::fromHex(d2.toLatin1());
                 static const QByteArray data3 = QByteArray::fromHex("0D0A300D0A0D0A");
 
                 QByteArray customData = file.readAll();

@@ -230,7 +230,7 @@ void App::sendCmdLine()
         for (int i=0; i<Player::tcpPlayers.size(); i++)
         {
             Player* p = Player::tcpPlayers[i];
-            logMessage(p->name+" "+p->IP+":"+QString().setNum(p->port));
+            logMessage(tr("%1\tlvl:%2\tlastOnline:%3").arg(p->name).arg(p->accessLvl).arg(p->lastOnline.toString("yyyy-MM-dd HH:mm:ss")));
         }
         return;
     }
@@ -431,6 +431,12 @@ void App::sendCmdLine()
         }
         logError(QObject::tr("Error: Destination peer does not exist!"));
     }
+    else if (str.startsWith("Players2xml", Qt::CaseInsensitive))
+    {
+        Player::tcpPlayers = Player::loadPlayersDat();
+        Player::savePlayers(Player::tcpPlayers);
+        return;
+    }
     else if (str.startsWith("Ponies2xml", Qt::CaseInsensitive))
     {
         for (int i=0; i<Player::tcpPlayers.size(); i++)
@@ -450,6 +456,7 @@ void App::sendCmdLine()
             else
                 logError(QObject::tr("No ponies found for user %1").arg(p->name));
         }
+        return;
     }
     if (cmdPeer->IP=="")
     {

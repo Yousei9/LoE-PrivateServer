@@ -1,5 +1,6 @@
 #include <QFile>
 #include <QDir>
+#include <QLocale>
 #include "player.h"
 #include "log.h"
 #include "serialize.h"
@@ -12,26 +13,115 @@
 
 bool Player::savePlayers(QList<Player*>& playersData)
 {
-    QFile playersFile("data/players/players.dat");
+    QFile playersFile(QDir::currentPath()+"/data/players/players.xml");
+
     if (!playersFile.open(QIODevice::ReadWrite | QIODevice::Truncate))
     {
-        logStatusError(tr("Error saving players database"));
+        logError(QObject::tr("Error writing %1").arg(playersFile.fileName()));
         return false;
     }
 
-    for (int i=0;i<playersData.size();i++)
+    QXmlStreamWriter xmlWriter(&playersFile);
+    xmlWriter.setAutoFormatting(true);
+    xmlWriter.writeStartDocument();
+    xmlWriter.writeStartElement("root");
+
+    for (int i=0; i<playersData.size(); i++)
     {
-        playersFile.write(playersData[i]->name.toLatin1());
-        playersFile.write("\31");
-        playersFile.write(playersData[i]->passhash.toLatin1());
-        if (i+1!=playersData.size())
-            playersFile.write("\n");
+        xmlWriter.writeStartElement("player");
+            xmlWriter.writeTextElement("name", playersData[i]->name);
+            xmlWriter.writeTextElement("passhash", playersData[i]->passhash);
+            if (playersData[i]->accessLvl == 0)
+                playersData[i]->accessLvl = 1;
+            xmlWriter.writeTextElement("accesslevel", QString::number(playersData[i]->accessLvl));
+            xmlWriter.writeTextElement("lastOnline", playersData[i]->lastOnline.toString("yyyy-MM-dd HH:mm:ss"));
+        xmlWriter.writeEndElement();
     }
+
+    xmlWriter.writeEndElement();
+    xmlWriter.writeEndDocument();
+
+    if (xmlWriter.hasError())
+    {
+        logError(QObject::tr("XML Writer Error writing %1").arg(playersFile.fileName()));
+        return false;
+    }
+
     playersFile.close();
     return true;
 }
 
 QList<Player*> Player::loadPlayers()
+{
+    QList<Player*> players;
+    QFile playersFile(QDir::currentPath()+"/data/players/players.xml");
+    QDomDocument doc;
+
+    if (!playersFile.exists())
+    {
+        logMessage(tr("Players database not found, creating it"));
+        QDir playersDir("data/players");
+        if(!playersDir.exists())
+            playersDir.mkpath(".");
+
+        if (!playersFile.open(QIODevice::ReadWrite | QIODevice::Truncate))
+        {
+            logError(QObject::tr("Error creating %1").arg(playersFile.fileName()));
+            return players;
+        }
+
+        QXmlStreamWriter xmlWriter(&playersFile);
+        xmlWriter.setAutoFormatting(true);
+        xmlWriter.writeStartDocument();
+        xmlWriter.writeStartElement("root");
+        xmlWriter.writeEndElement();
+        xmlWriter.writeEndDocument();
+
+        playersFile.close();
+
+        if (xmlWriter.hasError())
+        {
+            logError(QObject::tr("XML Writer Error writing %1").arg(playersFile.fileName()));
+            return players;
+        }
+    }
+
+    if(!playersFile.open(QIODevice::ReadOnly) || !doc.setContent(&playersFile)) // parse xml file
+    {
+        logError(QObject::tr("Error opening %1").arg(playersFile.fileName()));
+        return players;
+    }
+
+    QDomNodeList DomPlayers = doc.elementsByTagName("player");
+    for (int i = 0; i < DomPlayers.size(); i++)
+    {
+        QDomNode n = DomPlayers.item(i);
+        Player* newPlayer = new Player;
+
+        QDomElement DomName = n.firstChildElement("name");
+        QDomElement DomPassHash = n.firstChildElement("passhash");
+        QDomElement DomAccessLvl = n.firstChildElement("accesslevel");
+        QDomElement DomLastOnline = n.firstChildElement("lastOnline");
+
+        if (DomName.isNull() || DomPassHash.isNull() || DomAccessLvl.isNull() || DomLastOnline.isNull() )
+            continue;
+
+        newPlayer->name = DomName.text();
+        newPlayer->passhash = DomPassHash.text();
+        newPlayer->accessLvl = DomAccessLvl.text().toUInt();
+
+        QString sLastOn = DomLastOnline.text();
+        newPlayer->lastOnline = QLocale("en_US").toDateTime(sLastOn.simplified(), "yyyy-M-d H:m:s");
+
+        players << newPlayer;
+    }
+
+    playersFile.close();
+    logMessage(tr("Got %1 players in database").arg(players.size()));
+    return players;
+}
+
+QList<Player*> Player::loadPlayersDat()
 {
     QList<Player*> players;
     QFile playersFile("data/players/players.dat");
@@ -77,10 +167,6 @@ void Player::savePonies(Player *player, QList<Pony> ponies)
 {
     logMessage(tr("UDP: Saving ponies for %1 (%2)").arg(player->pony.netviewId).arg(player->name));
 
-    QDir playerPath(QDir::currentPath());
-    playerPath.cd("data");
-    playerPath.cd("players");    
-
     // save in xml format
     QFile xmlfile(QDir::currentPath()+"/data/players/"+player->name.toLatin1()+".xml");
 
@@ -93,7 +179,7 @@ void Player::savePonies(Player *player, QList<Pony> ponies)
     QXmlStreamWriter xmlWriter(&xmlfile);
     xmlWriter.setAutoFormatting(true);
     xmlWriter.writeStartDocument();
-    xmlWriter.writeStartElement("ponies");
+    xmlWriter.writeStartElement("root");
 
     for (int i=0; i<ponies.size(); i++)
     {
@@ -101,9 +187,9 @@ void Player::savePonies(Player *player, QList<Pony> ponies)
             // Write pony
             xmlWriter.writeTextElement("name", ponies[i].name);
             xmlWriter.writeTextElement("ponydata", ponies[i].ponyData.toBase64());
-            if (ponies[i].accessLvl == 0)
-                ponies[i].accessLvl = 1;
-            xmlWriter.writeTextElement("accesslevel", QString::number(ponies[i].accessLvl));
+//            if (ponies[i].accessLvl == 0)
+//                ponies[i].accessLvl = 1;
+//            xmlWriter.writeTextElement("accesslevel", QString::number(ponies[i].accessLvl));
             xmlWriter.writeStartElement("pos");
                 xmlWriter.writeAttribute("x", QString::number(ponies[i].pos.x));
                 xmlWriter.writeAttribute("y", QString::number(ponies[i].pos.y));
@@ -170,75 +256,6 @@ void Player::savePonies(Player *player, QList<Pony> ponies)
 
 }
 
-QList<Pony> Player::loadPoniesDat(Player* player)
-{
-    QList<Pony> ponies;
-    QFile file(QDir::currentPath()+"/data/players/"+player->name.toLatin1()+"/ponies.dat");
-    if (!file.open(QIODevice::ReadOnly))
-    {
-        logError(QObject::tr("Error reading ponies for %1").arg(player->name));
-        return ponies;
-    }
-
-    QByteArray data = file.readAll();
-    file.close();
-
-    int i=0;
-    while (i<data.size())
-    {
-        Pony pony{player};
-        // Read the ponyData
-        unsigned strlen;
-        unsigned lensize=0;
-        {
-            unsigned char num3; int num=0, num2=0;
-            do {
-                num3 = data[i+lensize]; lensize++;
-                num |= (num3 & 0x7f) << num2;
-                num2 += 7;
-            } while ((num3 & 0x80) != 0);
-            strlen = (uint) num;
-        }
-        int ponyDataSize = strlen+lensize+PONYDATA_SIZE;
-        pony.ponyData = data.mid(i,ponyDataSize);
-        pony.name = dataToString(pony.ponyData); // The name is the first elem
-        //app.logMessage("Found pony : "+pony.name);
-        i+=ponyDataSize;
-
-        // Read pos
-        UVector pos = dataToVector(data.mid(i,12));
-        pony.pos = pos;
-        i+=12;
-
-        // Read sceneName
-        unsigned strlen2;
-        unsigned lensize2=0;
-        {
-            unsigned char num3; int num=0, num2=0;
-            do {
-                num3 = data[i+lensize2]; lensize2++;
-                num |= (num3 & 0x7f) << num2;
-                num2 += 7;
-            } while ((num3 & 0x80) != 0);
-            strlen2 = (uint) num;
-        }
-        pony.sceneName = data.mid(i+lensize2, strlen2).toLower();
-        i+=strlen2+lensize2;
-
-        // Create quests
-        for (int i=0; i<Quest::quests.size(); i++)
-        {
-            Quest quest = Quest::quests[i];
-            quest.setOwner(player);
-            pony.quests << quest;
-        }
-        pony.accessLvl = 1;
-
-        ponies << pony;
-    }
-    return ponies;
-} // end parse dat file
-
 QList<Pony> Player::loadPonies(Player* player)
 {
     QList<Pony> ponies;
@@ -257,18 +274,16 @@ QList<Pony> Player::loadPonies(Player* player)
         // read pony
         QDomElement DomName = n.firstChildElement("name");
         QDomElement DomPonyData = n.firstChildElement("ponydata");
-        QDomElement DomAccess = n.firstChildElement("accesslevel");
         QDomElement DomScene = n.firstChildElement("scene");
         QDomElement DomPos = n.firstChildElement("pos");
         QDomElement DomRot = n.firstChildElement("rot");
 
-        if (DomName.isNull() || DomPonyData.isNull() || DomAccess.isNull() || DomScene.isNull() || DomPos.isNull() )
+        if (DomName.isNull() || DomPonyData.isNull() || DomScene.isNull() || DomPos.isNull() )
             continue;
 
         Pony pony{player};
         pony.ponyData = QByteArray::fromBase64(DomPonyData.text().toUtf8());
         pony.name = dataToString(pony.ponyData);
-        pony.accessLvl = DomAccess.text().toUInt();
         pony.sceneName = DomScene.text();
 
         pony.pos.x = DomPos.attribute("x").toFloat();
@@ -361,6 +376,75 @@ QList<Pony> Player::loadPonies(Player* player)
     xmlfile.close();
     return ponies;
 } // end parse xml
+
+QList<Pony> Player::loadPoniesDat(Player* player)
+{
+    QList<Pony> ponies;
+    QFile file(QDir::currentPath()+"/data/players/"+player->name.toLatin1()+"/ponies.dat");
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        logError(QObject::tr("Error reading ponies for %1").arg(player->name));
+        return ponies;
+    }
+
+    QByteArray data = file.readAll();
+    file.close();
+
+    int i=0;
+    while (i<data.size())
+    {
+        Pony pony{player};
+        // Read the ponyData
+        unsigned strlen;
+        unsigned lensize=0;
+        {
+            unsigned char num3; int num=0, num2=0;
+            do {
+                num3 = data[i+lensize]; lensize++;
+                num |= (num3 & 0x7f) << num2;
+                num2 += 7;
+            } while ((num3 & 0x80) != 0);
+            strlen = (uint) num;
+        }
+        int ponyDataSize = strlen+lensize+PONYDATA_SIZE;
+        pony.ponyData = data.mid(i,ponyDataSize);
+        pony.name = dataToString(pony.ponyData); // The name is the first elem
+        //app.logMessage("Found pony : "+pony.name);
+        i+=ponyDataSize;
+
+        // Read pos
+        UVector pos = dataToVector(data.mid(i,12));
+        pony.pos = pos;
+        i+=12;
+
+        // Read sceneName
+        unsigned strlen2;
+        unsigned lensize2=0;
+        {
+            unsigned char num3; int num=0, num2=0;
+            do {
+                num3 = data[i+lensize2]; lensize2++;
+                num |= (num3 & 0x7f) << num2;
+                num2 += 7;
+            } while ((num3 & 0x80) != 0);
+            strlen2 = (uint) num;
+        }
+        pony.sceneName = data.mid(i+lensize2, strlen2).toLower();
+        i+=strlen2+lensize2;
+
+        // Create quests
+        for (int i=0; i<Quest::quests.size(); i++)
+        {
+            Quest quest = Quest::quests[i];
+            quest.setOwner(player);
+            pony.quests << quest;
+        }
+        //pony.accessLvl = 1;
+
+        ponies << pony;
+    }
+    return ponies;
+} // end parse dat file
 
 void Pony::saveQuests(QList<QString> ponyNames)
 {

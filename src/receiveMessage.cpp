@@ -155,8 +155,17 @@ void receiveMessage(Player* player)
         {
             logMessage(QObject::tr("UDP: %3 connected from %1:%2").arg(player->IP).arg(player->port).arg(player->name));
             player->connected=true;
+
+            if (player->accessLvl == 0) // increase access Level for new created players to 1 (connected)
+                player->accessLvl = 1;
+
             for (int i=0; i<32; i++) // Reset sequence counters
                 player->udpSequenceNumbers[i]=0;
+
+            player->lastOnline = QDateTime::currentDateTimeUtc(); // write updated login time to players.xml
+            Player::updatePlayer(Player::tcpPlayers, player);
+            Player::savePlayers(Player::tcpPlayers);
+
             onConnectAckReceived(player); // Clean the reliable message queue from SYN|ACKs
 
             // Start game
