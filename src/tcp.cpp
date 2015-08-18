@@ -301,7 +301,6 @@ void App::tcpProcessData(QByteArray data, QTcpSocket* socket)
     {
         QString postData = QString(*recvBuffer);
         *recvBuffer = recvBuffer->right(postData.size()-postData.indexOf("version=")-8-4); // 4 : size of version number (ie:version=1344)
-        logMessage(tr("TCP: Login request received :"));
         QFile file(QString(NETDATAPATH)+"/loginHeader.bin");
         QFile fileServersList(SERVERSLISTFILEPATH);
         QFile fileBadPassword(QString(NETDATAPATH)+"/loginWrongPassword.bin");
@@ -314,9 +313,6 @@ void App::tcpProcessData(QByteArray data, QTcpSocket* socket)
         }
         else
         {
-            //ToDO: add client version check
-            logMessage(tr("Version : ","Version of the client software")
-                           +postData.mid(postData.indexOf("version=")+8));            
             bool ok=true;
             postData = postData.right(postData.size()-postData.indexOf("username=")-9);
             QString username = postData;
@@ -324,9 +320,17 @@ void App::tcpProcessData(QByteArray data, QTcpSocket* socket)
             postData = postData.right(postData.size()-postData.indexOf("passhash=")-9);
             QString passhash = postData;
             passhash.truncate(postData.indexOf('&'));
-            logMessage(tr("IP : %1","An IP address").arg(socket->peerAddress().toString()));
-            logMessage(tr("Username : %1").arg(username));
-            logMessage(tr("Passhash : %1","A cryptographic hash of a password").arg(passhash));
+
+            //client version check
+            QString clientVersion = postData.mid(postData.indexOf("version=")+8);
+            if (clientVersion != "20140416")
+            {
+                logError(tr("TCP: Login rejected from %1 (%2), unsupported client version %3").arg(socket->peerAddress().toString()).arg(username).arg(clientVersion));
+                socket->write(fileBadPassword.readAll());
+                socket->close();
+                return;
+            }
+            logMessage(tr("TCP: Login request received from %1 (%2)").arg(socket->peerAddress().toString()).arg(username));
 
             // check if playername contains illegal characters
             // regex checked with https://regex101.com/r/vS7vZ3/11

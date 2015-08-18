@@ -65,7 +65,8 @@ void receiveMessage(Player* player)
                 player->nReceivedDups++;
                 if (player->nReceivedDups >= 100) // Kick the player if he's infinite-looping on us
                 {
-                    logError(QObject::tr("UDP: Kicking %1 : Too many packet dups").arg(player->pony.netviewId));
+                    logError(QObject::tr("UDP: Kicking %1 (%2/%3): Too many packet dups")
+                             .arg(player->pony.netviewId).arg(player->name).arg(player->pony.name));
                     sendMessage(player,MsgDisconnect, "You were kicked for lagging the server, sorry. You can login again.");
                     Player::disconnectPlayerCleanup(player); // Save game and remove the player
                     return;
@@ -91,8 +92,9 @@ void receiveMessage(Player* player)
         }
         else if (seq > player->udpRecvSequenceNumbers[channel]+2) // If a message was skipped, keep going.
         {
-            logMessage(QObject::tr("UDP: Unordered message (+%1) received from %2")
-                           .arg(seq-player->udpRecvSequenceNumbers[channel]).arg(player->pony.netviewId));
+            logMessage(QObject::tr("UDP: Unordered message (+%1) received from %2 (%3/%4)")
+                       .arg(seq-player->udpRecvSequenceNumbers[channel])
+                       .arg(player->pony.netviewId).arg(player->name).arg(player->pony.name));
             player->udpRecvSequenceNumbers[channel] = seq;
 
             // Mark the packets we skipped as missing
@@ -150,10 +152,11 @@ void receiveMessage(Player* player)
     else if ((unsigned char)msg[0] == MsgConnectionEstablished) // Connect ACK
     {
         if (player->connected)
-            logError(QObject::tr("UDP: Received duplicate connect ACK"));
+            logError(QObject::tr("UDP: Received duplicate connect ACK from %1 (%2/%3)")
+                     .arg(player->pony.netviewId).arg(player->name).arg(player->pony.name));
         else
         {
-            logMessage(QObject::tr("UDP: %3 connected from %1:%2").arg(player->IP).arg(player->port).arg(player->name));
+            //logMessage(QObject::tr("UDP: %3 connected from %1:%2").arg(player->IP).arg(player->port).arg(player->name));
             player->connected=true;
 
             if (player->accessLvl == 0) // increase access Level for new created players to 1 (connected)
@@ -295,7 +298,7 @@ void receiveMessage(Player* player)
                 quint32 id = (quint8)msg[6] +((quint8)msg[7]<<8) + ((quint8)msg[8]<<16) + ((quint8)msg[9]<<24);
                 if (ponies.size()<0 || (quint32)ponies.size() <= id)
                 {
-                    logError(QObject::tr("UDP: Received invalid id in 'edit ponies' request. Disconnecting user."));
+                    logError(QObject::tr("UDP: Received invalid id in 'edit ponies' request. Disconnecting user %1.").arg(player->name));
                     sendMessage(player,MsgDisconnect, "You were kicked for sending invalid data.");
                     Player::disconnectPlayerCleanup(player); // Save game and remove the player
                     return; // It's ok, since we just disconnected the player
@@ -342,7 +345,7 @@ void receiveMessage(Player* player)
         }
         else if ((unsigned char)msg[0]==MsgUserReliableOrdered12 && (unsigned char)msg[7]==0xCA) // Animation
         {
-            //app.logMessage("UDP: Broadcasting animation");
+            //logMessage(QObject::tr("UDP: Broadcasting animation %1").arg( QString(msg.mid(5, msgSize - 5).toHex()) ) );
             // Send to everyone
             Scene* scene = findScene(player->pony.sceneName);
             if (scene->name.isEmpty())
@@ -450,7 +453,7 @@ void receiveMessage(Player* player)
             // Send to everyone
             Scene* scene = findScene(player->pony.sceneName);
             if (scene->name.isEmpty())
-                logMessage(QObject::tr("UDP: Can't find the scene for skill message, aborting"));
+                logError(QObject::tr("UDP: Can't find the scene for skill message, aborting"));
             else
             {
                 for (int i=0; i<scene->players.size(); i++)
@@ -634,6 +637,7 @@ void receiveMessage(Player* player)
     else if ((unsigned char)msg[0]==MsgUserUnreliable) // Sync (position) update
     {
         //logMessage(QString().setNum((player->pony.netviewId))+" recieved sync for "+ QString().setNum(dataToUint16(msg.mid(5))));
+        //logMessage(QString().setNum((player->pony.netviewId))+" recieved sync "+ QString(msg.toHex()));
         if (dataToUint16(msg.mid(5)) == player->pony.netviewId)
             Sync::receiveSync(player, msg);            
     }

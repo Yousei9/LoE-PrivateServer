@@ -126,7 +126,8 @@ void udpProcessPendingDatagrams()
                 Player* newPlayer = new Player;
                 newPlayer->IP = rAddr.toString();
                 newPlayer->port = rPort;
-                sendMessage(newPlayer, MsgDisconnect, "Error: Wrong server password. This server is protected with a salt password.");
+                sendMessage(newPlayer, MsgDisconnect, "Error: This server handles login requests itself. Connect with a patched client");
+                //sendMessage(newPlayer, MsgDisconnect, "Error: Wrong server password. This server is protected with a salt password.");
                 return;
             }
         }

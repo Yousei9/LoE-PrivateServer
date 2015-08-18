@@ -281,7 +281,7 @@ void sendNetviewInstantiate(Pony *src, Player *dst)
 
 void sendNetviewRemove(Player *player, quint16 netviewId)
 {
-    logMessage(QObject::tr("UDP: Removing netview %1 to %2").arg(netviewId).arg(player->pony.netviewId));
+    //logMessage(QObject::tr("UDP: Removing netview %1 to %2").arg(netviewId).arg(player->pony.netviewId));
 
     QByteArray data(3,2);
     data[1] = (quint8)(netviewId&0xFF);
@@ -502,8 +502,8 @@ bool sendLoadSceneRPC(Player* player, QString sceneName) // Loads a scene and se
 
 bool sendLoadSceneRPC(Player* player, QString sceneName, UVector pos, UQuaternion rot) // Loads a scene and send to the given pos
 {
-    logMessage(QString(QString("UDP: Loading scene \"%1\" to %2 at pos %3 %4 %5 rot %6 %7 %8 %9")
-                           .arg(sceneName).arg(player->pony.netviewId)
+    logMessage(QString(QString("UDP: Loading scene \"%1\" to %2 (%3/%4) at pos %5 %6 %7 rot %8 %9 %10 %11")
+                           .arg(sceneName).arg(player->pony.netviewId).arg(player->name).arg(player->pony.name)
                            .arg(pos.x).arg(pos.y).arg(pos.z)
                            .arg(rot.x).arg(rot.y).arg(rot.z).arg(rot.w)));
 
