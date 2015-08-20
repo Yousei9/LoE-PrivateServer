@@ -336,9 +336,10 @@ void App::tcpProcessData(QByteArray data, QTcpSocket* socket)
             // regex checked with https://regex101.com/r/vS7vZ3/11
             QRegularExpression re("^(?!\\s)([\\w\\s\\-]+)+$");
             QRegularExpressionMatch match = re.match(username);
-            if (!match.hasMatch() || username.toLower() == "players")
+            if (!match.hasMatch() || username.toLower() == "players" || username.length() < 3
+                    || passhash.isEmpty() || passhash == "novalid" )
             {
-                logMessage(tr("TCP: Login failed, invalid username"));
+                logError(tr("TCP: Login failed, invalid username or passhash"));
                 socket->write(fileBadPassword.readAll());
                 socket->close();
                 return;
@@ -365,6 +366,7 @@ void App::tcpProcessData(QByteArray data, QTcpSocket* socket)
                     newPlayer->connected = false; // The connection checks are done by the game servers
 
                     Player::tcpPlayers << newPlayer;
+
                     if (!Player::savePlayers(Player::tcpPlayers))
                         ok = false;
                 }

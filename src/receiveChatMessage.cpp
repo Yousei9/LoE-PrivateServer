@@ -54,9 +54,13 @@ void receiveChatMessage(QByteArray msg, Player* player)
 
         for (int i=0; i<Player::udpPlayers.size(); i++)
             if (Player::udpPlayers[i]->inGame>=1)
-                namesmsg += "<br />#b" + Player::udpPlayers[i]->pony.name
-                        + "#b<br /><span color=\"yellow\"> - in "
-                        + Player::udpPlayers[i]->pony.sceneName + "</span>";
+            {
+                namesmsg += "<br />#b" + Player::udpPlayers[i]->pony.name;
+                if (player->accessLvl >= 3)
+                    namesmsg += " (" + Player::udpPlayers[i]->name + ")";
+                namesmsg += "#b<br /><span color=\"yellow\"> - in "
+                            + Player::udpPlayers[i]->pony.sceneName + "</span>";
+            }
 
         sendChatMessage(player, namesmsg, "[Server]", channel, accessServer);
         return;
