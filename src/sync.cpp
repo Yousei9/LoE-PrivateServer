@@ -32,13 +32,13 @@ void Sync::doSync()
         {
             for (int k=0; k<Scene::scenes[i].players.size(); k++)
             {
-                if (j!=k)
-                {
-                    // sending sync to self before before sync: no client updates positions
-                    // sending sync to self after sync: clients usync correctly across all players (tested with 2-5 ponies)
-                    sendSyncMessage(Scene::scenes[i].players[j], Scene::scenes[i].players[k]);
-                    sendSyncMessage(Scene::scenes[i].players[k], Scene::scenes[i].players[k]);
-                }
+                if (j==k)
+                    continue;
+
+                // sending sync to self before sync: no client updates positions
+                // sending sync to self after sync: clients sync correctly across all players (tested with 2-5 ponies)
+                sendSyncMessage(Scene::scenes[i].players[k], Scene::scenes[i].players[j]);
+                sendSyncMessage(Scene::scenes[i].players[j], Scene::scenes[i].players[j]);
             }
         }
     }
