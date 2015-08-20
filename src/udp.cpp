@@ -122,11 +122,12 @@ void udpProcessPendingDatagrams()
             }
             else
             {
-                logError(QObject::tr("UDP: %1:%2 Sesskey rejected","The sesskey is a cryptographic hash, short for session key").arg(rAddr.toString()).arg(rPort));
+                logError(QObject::tr("UDP: %1:%2 (%3) Sesskey rejected","The sesskey is a cryptographic hash, short for session key")
+                         .arg(rAddr.toString()).arg(rPort).arg(name));
                 Player* newPlayer = new Player;
                 newPlayer->IP = rAddr.toString();
                 newPlayer->port = rPort;
-                sendMessage(newPlayer, MsgDisconnect, "Error: This server handles login requests itself. Connect with a patched client");
+                sendMessage(newPlayer, MsgDisconnect, "Error: Session Key or server password invalid. Only patched clients may connect to this server. Connections from local running servers are not supported.");
                 //sendMessage(newPlayer, MsgDisconnect, "Error: Wrong server password. This server is protected with a salt password.");
                 return;
             }
