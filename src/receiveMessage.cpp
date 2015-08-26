@@ -20,6 +20,9 @@ void receiveMessage(Player* player)
     QByteArray msg = *(player->receivedDatas);
     int msgSize=5 + (((unsigned char)msg[3]) + (((unsigned char)msg[4]) << 8))/8;
 
+    //if ((unsigned char)msg[0]!=MsgUserUnreliable)
+        //logMessage(QObject::tr("UDP: %1 sent: %2").arg(player->pony.name).arg(player->receivedDatas->toHex().data()));
+
 #if UDP_SIMULATE_PACKETLOSS
     if (qrand() % 100 <= UDP_RECV_PERCENT_DROPPED)
     {
@@ -343,9 +346,9 @@ void receiveMessage(Player* player)
             Player::savePonies(player,ponies);
             sendPonies(player);
         }
-        else if ((unsigned char)msg[0]==MsgUserReliableOrdered12 && (unsigned char)msg[7]==0xCA) // Animation
+        else if ((unsigned char)msg[0]==MsgUserReliableOrdered12) // Animation
         {
-            //logMessage(QObject::tr("UDP: Broadcasting animation %1").arg( QString(msg.mid(5, msgSize - 5).toHex()) ) );
+            //logMessage(QObject::tr("UDP: Broadcasting animation %1 from %2 (%3)").arg( QString(msg.mid(5, msgSize - 5).toHex())).arg(player->pony.id).arg(player->pony.name) );
             // Send to everyone
             Scene* scene = findScene(player->pony.sceneName);
             if (scene->name.isEmpty())

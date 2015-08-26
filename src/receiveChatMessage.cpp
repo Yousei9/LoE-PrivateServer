@@ -36,7 +36,7 @@ void receiveChatMessage(QByteArray msg, Player* player)
         return;
     }
 
-    if (messages[0].startsWith(":commands") || messages[0].startsWith(":help"))  // "/help" is handled by the client
+    if (messages[0].startsWith(":commands", Qt::CaseInsensitive) || messages[0].startsWith(":help", Qt::CaseInsensitive))  // "/help" is handled by the client
     {
         sendChatMessage(player, QString("<span color=\"yellow\">List of additional Commands:</span><br />")
                         +QString("<em>:players</em><br /><span color=\"yellow\">Lists all players on the server</span><br />")
@@ -48,26 +48,31 @@ void receiveChatMessage(QByteArray msg, Player* player)
     }
 
     // list all players in all instances
-    if (messages[0].startsWith(":players"))
+    if (messages[0].startsWith(":players", Qt::CaseInsensitive))
     {
-        QString namesmsg = "<span color=\"yellow\">Players currently in game:</span>";
+        QString namesmsg2;
+        int playersInGame = 0;
 
         for (int i=0; i<Player::udpPlayers.size(); i++)
             if (Player::udpPlayers[i]->inGame>=1)
             {
-                namesmsg += "<br />#b" + Player::udpPlayers[i]->pony.name;
+                playersInGame++;
+                namesmsg2 += "<br />#b" + Player::udpPlayers[i]->pony.name;
                 if (player->accessLvl >= 3)
-                    namesmsg += " (" + Player::udpPlayers[i]->name + ")";
-                namesmsg += "#b<br /><span color=\"yellow\"> - in "
+                    namesmsg2 += " (" + Player::udpPlayers[i]->name + ")";
+                namesmsg2 += "#b<br /><span color=\"yellow\"> - in "
                             + Player::udpPlayers[i]->pony.sceneName + "</span>";
             }
+
+        QString namesmsg = QString("<span color=\"yellow\">%1 Players currently in game:</span>").arg(playersInGame);
+        namesmsg += namesmsg2;
 
         sendChatMessage(player, namesmsg, "[Server]", channel, accessServer);
         return;
     }
 
     // allow players to teleport to any scene
-    if (messages[0].startsWith(":tp"))
+    if (messages[0].startsWith(":tp", Qt::CaseInsensitive))
     {
         if (messages[0].count(" ") < 1)
         {
@@ -95,7 +100,7 @@ void receiveChatMessage(QByteArray msg, Player* player)
     }
 
     // advanced whisper :w
-    if (messages[0].startsWith(":w"))
+    if (messages[0].startsWith(":w", Qt::CaseInsensitive))
     {
         if(messages[0].count(" ") < 2)
         {
@@ -119,8 +124,8 @@ void receiveChatMessage(QByteArray msg, Player* player)
                     Player::udpPlayers[i]->pony.name == recipient )
                 {
                     // until we can make whisper chat get update notice send it to all tabs
-                    sendChatBroadcast(player, message, "to " + Player::udpPlayers[i]->pony.name, accessLevel); // show in own messages
-                    sendChatBroadcast(Player::udpPlayers[i], message, author, accessLevel); // show in recipients messages
+                    sendChatBroadcast(player, "#c19B1FE" + message, "to " + Player::udpPlayers[i]->pony.name, accessLevel); // show in own messages
+                    sendChatBroadcast(Player::udpPlayers[i], "#c19B1FE" + message, "from " + author, accessLevel); // show in recipients messages
                     recipientsFound += Player::udpPlayers[i]->pony.name +",";
                 }
             }
@@ -138,8 +143,8 @@ void receiveChatMessage(QByteArray msg, Player* player)
                     Player::udpPlayers[i]->pony.name.toLower().remove(" ").startsWith(recipient))
                 {
                     // until we can make whisper chat get update notice send it to all tabs
-                    sendChatBroadcast(player, message, "to " + Player::udpPlayers[i]->pony.name, accessLevel); // show in own messages
-                    sendChatBroadcast(Player::udpPlayers[i], message, author, accessLevel); // show in recipients messages
+                    sendChatBroadcast(player, "#c19B1FE" + message, "to " + Player::udpPlayers[i]->pony.name, accessLevel); // show in own messages
+                    sendChatBroadcast(Player::udpPlayers[i], "#c19B1FE" + message, "from" + author, accessLevel); // show in recipients messages
                     recipientsFound += Player::udpPlayers[i]->pony.name +",";
                 }
             }
@@ -164,8 +169,8 @@ void receiveChatMessage(QByteArray msg, Player* player)
                 Player::udpPlayers[i]->pony.name.toLower().remove(" ").startsWith(messages[0].toLower()))
             {
                 // until we can make whisper chat get update notice send it to all tabs
-                sendChatBroadcast(player, messages[1], "to " + Player::udpPlayers[i]->pony.name, accessLevel); // show in own messages
-                sendChatBroadcast(Player::udpPlayers[i], messages[1], author, accessLevel); // show in recipients messages
+                sendChatBroadcast(player, "#c19B1FE" + messages[1], "#to " + Player::udpPlayers[i]->pony.name, accessLevel); // show in own messages
+                sendChatBroadcast(Player::udpPlayers[i], "#c19B1FE" + messages[1], "#from " + author, accessLevel); // show in recipients messages
                 recipientsFound += Player::udpPlayers[i]->pony.name +",";
             }
         }
@@ -177,21 +182,21 @@ void receiveChatMessage(QByteArray msg, Player* player)
     }
 
     // broadcast chat emote in current channel
-    if (messages[0].startsWith(":me"))
+    if (messages[0].startsWith(":me", Qt::CaseInsensitive))
     {
         if (messages[0].count(" ") < 1)
                 sendChatMessage(player, ":me<br /><span color=\"yellow\">Usage:</span><br /><em>:me action</em>", "[Server]", channel, accessServer);
         else
         {
             messages[0].remove(0, 3);
-            messages[0] = "<em>#b* " + author + "#b" + messages[0] + "</em>";
+            messages[0] = "<em>#b* " + author + "#b" + messages[0] + " *</em>";
             sendChannelMessage(player->pony.sceneName, channel, messages[0], "", 0);
         }
         return;
     }
 
     // roll a dice
-    if (messages[0].startsWith(":roll"))
+    if (messages[0].startsWith(":roll", Qt::CaseInsensitive))
     {
         int rollnum = -1;
         QString rollstr;
