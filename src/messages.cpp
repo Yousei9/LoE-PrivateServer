@@ -502,7 +502,7 @@ bool sendLoadSceneRPC(Player* player, QString sceneName) // Loads a scene and se
 
 bool sendLoadSceneRPC(Player* player, QString sceneName, UVector pos, UQuaternion rot) // Loads a scene and send to the given pos
 {
-    logMessage(QString(QString("UDP: Loading scene \"%1\" to %2 (%3/%4) at pos %5 %6 %7 rot %8 %9 %10 %11")
+    logMessage(QString(QString("UDP: Loading scene \"%1\" to %2 (%3/%4)\r\n\tat pos %5 %6 %7 rot %8 %9 %10 %11")
                            .arg(sceneName).arg(player->pony.netviewId).arg(player->name).arg(player->pony.name)
                            .arg(pos.x).arg(pos.y).arg(pos.z)
                            .arg(rot.x).arg(rot.y).arg(rot.z).arg(rot.w)));
