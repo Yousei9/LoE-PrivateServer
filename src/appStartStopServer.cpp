@@ -13,6 +13,7 @@
 #include "mob.h"
 #include "sync.h"
 #include "udp.h"
+#include "utils.h"
 #include <QUdpSocket>
 #include <QSettings>
 #include <QDir>
@@ -71,17 +72,8 @@ void App::startup()
 #endif
 
     /// Timestamps
-#if defined _WIN32 || defined WIN32
-    startTimestamp = GetTickCount();
-#elif __APPLE__
-    timeval time;
-    gettimeofday(&time, NULL);
-    startTimestamp = (time.tv_sec * 1000) + (time.tv_usec / 1000);
-#else
-    struct timespec tp;
-    clock_gettime(CLOCK_MONOTONIC, &tp);
-    startTimestamp = tp.tv_sec*1000 + tp.tv_nsec/1000/1000;
-#endif
+    startTimestamp = 0;
+    startTimestamp = timestampNow();
 
     /// Starting servers, depends on above
     if (enableLoginServer)
