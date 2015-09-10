@@ -27,6 +27,7 @@ The private server is still in beta, expect bugs. Patches and pull requests are 
 - others will see you standing on water rather than swimming
 - spawning below ground: <br/>
   restart client to fix
+- positions not syncing for all with more than 6 players on a map
 
 Some important features are still lacking at the moment:
 - no friend or herd system
