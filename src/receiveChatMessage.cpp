@@ -9,7 +9,7 @@
 void receiveChatMessage(QByteArray msg, Player* player)
 {
     QString author = player->pony.name;
-    quint8 accessLevel = player->accessLvl;
+    int accessLevel = player->accessLvl;
     quint8 accessServer = 0;
     quint8 channel = (quint8)msg[6];
     int msgIndex = 7;
@@ -54,7 +54,7 @@ void receiveChatMessage(QByteArray msg, Player* player)
                             .arg(Scene::scenes[i].name).arg(Scene::scenes[i].players.count());
                     for (int p=0; p<Scene::scenes[i].players.count(); p++)
                     {
-                        namesmsg2 += "<br />#b" + Scene::scenes[i].players[p]->pony.name;
+                        namesmsg2 += "<br />" + Scene::scenes[i].players[p]->pony.name;
                         if (player->accessLvl >= 3)
                             namesmsg2 += " (" + Scene::scenes[i].players[p]->name + ")";
                     }
@@ -167,6 +167,12 @@ void receiveChatMessage(QByteArray msg, Player* player)
         // broadcast chat emote in current channel
         if (messages[0].startsWith(":me", Qt::CaseInsensitive))
         {
+            // muted player
+            if (accessLevel < 1)
+            {
+                sendChatMessage(player, QString("<span color=\"yellow\">You have been muted.</span>"), "[Server]", channel, accessServer);
+                return;
+            }
             if (messages[0].count(" ") < 1)
                     sendChatMessage(player, ":me<br /><span color=\"yellow\">Usage:</span><br /><em>:me action</em>", "[Server]", channel, accessServer);
             else
@@ -181,6 +187,13 @@ void receiveChatMessage(QByteArray msg, Player* player)
         // roll a dice
         if (messages[0].startsWith(":roll", Qt::CaseInsensitive))
         {
+            // muted player
+            if (accessLevel < 1)
+            {
+                sendChatMessage(player, QString("<span color=\"yellow\">You have been muted.</span>"), "[Server]", channel, accessServer);
+                return;
+            }
+
             int rollnum = -1;
             QString rollstr;
 
@@ -234,6 +247,13 @@ void receiveChatMessage(QByteArray msg, Player* player)
     // Broadcast the message in current channel
     if (messages[0].length() > 0)
     {
+        // muted player
+        if (accessLevel < 1)
+        {
+            sendChatMessage(player, QString("<span color=\"yellow\">You have been muted.</span>"), "[Server]", channel, accessServer);
+            return;
+        }
+        // gm broadcast
         if (messages[0].startsWith(">>") && accessLevel >= 3) // temp gm broadcast
         {
             messages[0].remove(0, 2);
@@ -246,6 +266,7 @@ void receiveChatMessage(QByteArray msg, Player* player)
                 }
             }
         }
+        // normal message
         else
             sendChannelMessage(player->pony.sceneName, channel, messages[0], author, accessLevel);
     }

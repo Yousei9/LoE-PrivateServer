@@ -61,10 +61,12 @@ void App::sendCmdLine()
         logMessage(QObject::tr("%1 Starts and stops the game server").arg(indent));
         logMessage("status");
         logMessage(QObject::tr("%1 Shows the status of the login and game servers").arg(indent));
-        logMessage("listTcpPlayers");
-        logMessage(QObject::tr("%1 Lists players registered with the game server").arg(indent));
-        logMessage("removeTcpPlayer");
+        logMessage("listPlayers");
+        logMessage(QObject::tr("%1 Lists players registered in playerDB").arg(indent));
+        logMessage("removePlayer");
         logMessage(QObject::tr("%1 removes player from playerDB (doesn't delete ponies)").arg(indent));
+        logMessage("setAccess");
+        logMessage(QObject::tr("%1 sets player access level in playerDB").arg(indent));
         logMessage("listPeers [scene]");
         logMessage(QObject::tr("%1 Lists the peers currently connected to the server").arg(indent));
         logMessage(QObject::tr("%1 If scene name is defined, return only peers in that scene").arg(indent));
@@ -225,7 +227,7 @@ void App::sendCmdLine()
         delete this;
         return;
     }
-    else if (str.startsWith("listTcpPlayers", Qt::CaseInsensitive))
+    else if (str.startsWith("listPlayers", Qt::CaseInsensitive))
     {
         for (int i=0; i<Player::tcpPlayers.size(); i++)
         {
@@ -234,23 +236,22 @@ void App::sendCmdLine()
         }
         return;
     }
-    else if (str.startsWith("removeTcpPlayer", Qt::CaseInsensitive))
+    else if (str.startsWith("removePlayer", Qt::CaseInsensitive))
     {
-        if (str.size() < 17)
+        QStringList command = str.split(" ",QString::SkipEmptyParts);
+        if (command.count() < 2)
         {
-            logMessage(tr("removeTcpPlayer takes account name as argument"));
+            logMessage(tr("removePlayer takes account name as argument"));
             return;
         }
 
-        str = str.right(str.size()-16);
-
-        //logMessage(tr("looking for playername: %1").arg(str));
+       //logMessage(tr("looking for playername: %1").arg(command[1]));
         bool found = false;
         for (int i=Player::tcpPlayers.size()-1; i>=0; i--)
         {
-            if (str == Player::tcpPlayers[i]->name)
+            if (command[1] == Player::tcpPlayers[i]->name)
             {
-                logMessage(tr("removing %1 at position %2//%3").arg(str).arg(i).arg(Player::tcpPlayers.size()-1));
+                logMessage(tr("removing %1 at position %2//%3").arg(command[1]).arg(i).arg(Player::tcpPlayers.size()-1));
                 Player::tcpPlayers.removeAt(i);
                 found = true;
             }
@@ -259,7 +260,48 @@ void App::sendCmdLine()
         {
             if (!Player::savePlayers(Player::tcpPlayers))
             {
-                logError(tr("Error saving players."));
+                logError(tr("Error saving players"));
+            }
+        }
+        else
+        {
+            logMessage(tr("playername %1 not found").arg(str));
+        }
+
+        return;
+    }
+    else if (str.startsWith("SetAccess", Qt::CaseInsensitive))
+    {
+        QStringList command = str.split(" ",QString::SkipEmptyParts);
+        if (command.count() < 3)
+        {
+            logMessage(tr("SetAccess takes account name and accessLevel as arguments"));
+            return;
+        }
+        bool ok;
+        int newAccessLvl = command[2].toInt(&ok);
+        if (!ok)
+        {
+            logMessage(tr("accessLevel needs to be integer"));
+            return;
+        }
+
+        //logMessage(tr("looking for playername: %1").arg(command[1]));
+        bool found = false;
+        for (int i=Player::tcpPlayers.size()-1; i>=0; i--)
+        {
+            if (command[1] == Player::tcpPlayers[i]->name)
+            {
+                logMessage(tr("setting Player %1 to accessLvl %2").arg(command[1]).arg(newAccessLvl));
+                Player::tcpPlayers[i]->accessLvl = newAccessLvl;
+                found = true;
+            }
+        }
+        if (found)
+        {
+            if (!Player::savePlayers(Player::tcpPlayers))
+            {
+                logError(tr("Error saving players"));
             }
         }
         else
@@ -430,33 +472,6 @@ void App::sendCmdLine()
             }
         }
         logError(QObject::tr("Error: Destination peer does not exist!"));
-    }
-    else if (str.startsWith("Players2xml", Qt::CaseInsensitive))
-    {
-        Player::tcpPlayers = Player::loadPlayersDat();
-        Player::savePlayers(Player::tcpPlayers);
-        return;
-    }
-    else if (str.startsWith("Ponies2xml", Qt::CaseInsensitive))
-    {
-        for (int i=0; i<Player::tcpPlayers.size(); i++)
-        {
-            Player* p = Player::tcpPlayers[i];
-            logMessage(QObject::tr("Converting ponies for user %1").arg(p->name));
-            QList<Pony> ponies = Player::loadPoniesDat(p);
-            for (int i=0; i<ponies.size(); i++)
-            {
-                ponies[i].loadQuests();
-                logMessage(QObject::tr("%1: found %2 quests").arg(ponies[i].name).arg(ponies[i].quests.size()));
-                ponies[i].loadInventory();
-                logMessage(QObject::tr("%1: found %2 inventory items and %3 bits").arg(ponies[i].name).arg(ponies[i].inv.size()).arg(ponies[i].nBits));
-            }
-            if (ponies.size() >= 1)
-                Player::savePonies(p, ponies);
-            else
-                logError(QObject::tr("No ponies found for user %1").arg(p->name));
-        }
-        return;
     }
     if (cmdPeer->IP=="")
     {

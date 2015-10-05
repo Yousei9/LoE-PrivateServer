@@ -627,6 +627,25 @@ void receiveMessage(Player* player)
                        .arg(reportText.data()));
             //msgSize=0;
         }
+        else if ((unsigned char)msg[0]==MsgUserReliableOrdered4 && (unsigned char)msg[5]==0xc9) // announcement
+        {
+            quint8 anTextLen = (quint8)msg[6];
+            QString anText = msg.mid(7, anTextLen).data();
+            quint32 anDur = (((quint32)(quint8)msg[8+anTextLen]) << 16)
+                            + (((quint32)(quint8)msg[9+anTextLen]) << 8)
+                            + ((quint32)(quint8)msg[10+anTextLen]);
+
+            logMessage(QObject::tr("UDP: Player %1(%2) announced for %3:\n%4")
+                       .arg(player->name)
+                       .arg(player->pony.id)
+                       .arg(anDur)
+                       .arg(anText));
+
+//            for (int i=0; i<Player::udpPlayers.size();i++)
+//            {
+//                sendMessage(Player::udpPlayers[i], MsgUserReliableOrdered4, msg.mid(6));
+//            }
+        }
         else
         {
             // Display data

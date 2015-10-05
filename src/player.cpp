@@ -206,8 +206,6 @@ void Player::disconnectPlayerCleanup(Player* player)
             ponies[i] = player->pony;
     }
     savePonies(player, ponies);
-    //player->pony.saveQuests(ponyNames);
-    //player->pony.saveInventory(ponyNames);
 
     QString uIP = player->IP;
     quint16 uPort = player->port;

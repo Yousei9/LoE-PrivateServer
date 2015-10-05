@@ -174,8 +174,6 @@ void disconnectUdpPlayers()
                 ponies[i] = player->pony;
         }
         Player::savePonies(player, ponies);
-        //player->pony.saveQuests(ponyNames);
-        //player->pony.saveInventory(ponyNames);
 
         // Free
         delete player;

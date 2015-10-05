@@ -584,6 +584,8 @@ void sendChatBroadcast(Player* to, QString message, QString author, quint8 acces
 
 void sendChatMessage(Player* to, QString message, QString author, quint8 chatType, quint8 accessLevel)
 {
+    if (accessLevel < 1 || accessLevel > 4) // valid access levels are 1-4
+        accessLevel = 1;
     QByteArray idAndAccess(5,0);
     idAndAccess[0] = (quint8)(to->pony.netviewId&0xFF);
     idAndAccess[1] = (quint8)((to->pony.netviewId << 8)&0xFF);
