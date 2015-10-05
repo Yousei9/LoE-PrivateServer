@@ -249,7 +249,7 @@ void App::sendCmdLine()
         bool found = false;
         for (int i=Player::tcpPlayers.size()-1; i>=0; i--)
         {
-            if (command[1] == Player::tcpPlayers[i]->name)
+            if (command[1].toLower() == Player::tcpPlayers[i]->name.toLower())
             {
                 logMessage(tr("removing %1 at position %2//%3").arg(command[1]).arg(i).arg(Player::tcpPlayers.size()-1));
                 Player::tcpPlayers.removeAt(i);
@@ -265,7 +265,7 @@ void App::sendCmdLine()
         }
         else
         {
-            logMessage(tr("playername %1 not found").arg(str));
+            logMessage(tr("player %1 not found").arg(command[1]));
         }
 
         return;
@@ -290,7 +290,7 @@ void App::sendCmdLine()
         bool found = false;
         for (int i=Player::tcpPlayers.size()-1; i>=0; i--)
         {
-            if (command[1] == Player::tcpPlayers[i]->name)
+            if (command[1].toLower() == Player::tcpPlayers[i]->name.toLower())
             {
                 logMessage(tr("setting Player %1 to accessLvl %2").arg(command[1]).arg(newAccessLvl));
                 Player::tcpPlayers[i]->accessLvl = newAccessLvl;
@@ -306,7 +306,7 @@ void App::sendCmdLine()
         }
         else
         {
-            logMessage(tr("playername %1 not found").arg(str));
+            logMessage(tr("player %1 not found").arg(command[1]));
         }
 
         return;
