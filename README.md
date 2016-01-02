@@ -15,7 +15,7 @@ The official release is for Windows. The client should work on Linux and Mac too
   <b>username and password may only be alphanumeric</b>
 
 <h3>update / patch existing Babscon 2014 client (for Mac & Linux)</h3>
-- download <a href="https://mega.nz/#!Gl4CUSaJ!Lp0O6GEhw0kLlc54RnouYGu1CzkbvTxo-XM0VfLBzWs">LoE - Yousei v20140416.2 (patched dll only).zip</a>
+- download <a href="https://mega.nz/#!C0YjCBQb!Lp0O6GEhw0kLlc54RnouYGu1CzkbvTxo-XM0VfLBzWs">LoE - Yousei v20140416.2 (patched dll only).zip</a>
 - replace the existing dll in /Contents/Data/Managed/ with these
 - start the game
 
