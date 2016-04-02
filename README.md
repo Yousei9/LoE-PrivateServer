@@ -8,14 +8,14 @@ The official release is for Windows. The client should work on Linux and Mac too
 <a href="https://drive.google.com/folderview?id=0B91uVmaVElUhNTlOZlFTUGJhU3c&usp=sharing">Google Drive</a><br/>
 
 <h3>How to play</h3>
-- download <a href="https://mega.nz/#!DkR0ALga!wiQ70MiA6otcw9R5YvqkvWUeal-rxXN6XKBK1GiHarE">LoE -Yousei Win(PonyvilleFM stream).zip</a>
+- download <a href="https://mega.nz/#!uk5lUJrA!wBK-GCNcPUJx4JQd1PP-HLhOVbeC1PZ3CgqckQgry84">LoE - Yousei v20140416.3.zip</a>
 - extract to a directory of your choice
 - start loe.exe
 - In the game pick a name/password (no need to register first)<br/>
   <b>username and password may only be alphanumeric</b>
 
 <h3>update / patch existing Babscon 2014 client (for Mac & Linux)</h3>
-- download <a href="https://mega.co.nz/#!ipZlABRA!PM3P2KRXsTaQ0PXmvNhWavsvz4jxbBRTrzFOFFzurh8"> LoE - Yousei (patched dll).zip</a>
+- download <a href="https://mega.nz/#!rtRQibLZ!48Wi-KLkjRVZ9Z73Ktwwu90C3e4KYLjwtRYBXUj9QHs">LoE - Yousei v20140416.3 (patched dll only).zip</a>
 - replace the existing dll in /Contents/Data/Managed/ with these
 - start the game
 
