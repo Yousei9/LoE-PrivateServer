@@ -13,6 +13,8 @@ int Settings::pingCheckInterval; // Time between ping timeout checks
 bool Settings::logInfos; // Can disable logMessage, but doesn't affect logStatusMessage
 QString Settings::saltPassword; // Used to check passwords between login and game servers, must be the same on all the servers involved
 bool Settings::enableSessKeyValidation; // Enable Session Key Validation
+int Settings::daysToPurge; // time since last logon before removing player
+
 bool Settings::enableLoginServer; // Starts a login server
 bool Settings::enableGameServer; // Starts a game server
 bool Settings::enableMultiplayer; // Sync players' positions

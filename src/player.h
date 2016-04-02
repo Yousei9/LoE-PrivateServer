@@ -67,6 +67,7 @@ public:
     ~Player();
     static void savePonies(Player* player,QList<Pony> ponies);
     static QList<Pony> loadPonies(Player *player);
+    static void removePonies(Player* player);
     static bool savePlayers(QList<Player*>& playersData);
     static QList<Player*> loadPlayers();
     static Player* findPlayer(QList<Player*>& players, QString uname);

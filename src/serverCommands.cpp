@@ -70,6 +70,8 @@ void App::sendCmdLine()
         logMessage("listPeers [scene]");
         logMessage(QObject::tr("%1 Lists the peers currently connected to the server").arg(indent));
         logMessage(QObject::tr("%1 If scene name is defined, return only peers in that scene").arg(indent));
+        logMessage("cleanPlayerDB");
+        logMessage(QObject::tr("%1 Removes players who didn't log in within the last %2 days").arg(indent).arg(daysToPurge));
         logMessage("setPeer <ponyid>");
         logMessage("setPeer <ip:port>");
         logMessage(QObject::tr("%1 Sets the 'currently selected' peer that will be used for other commands").arg(indent));
@@ -229,6 +231,7 @@ void App::sendCmdLine()
     }
     else if (str.startsWith("listPlayers", Qt::CaseInsensitive))
     {
+        logMessage(tr("%1 Players in Database").arg(Player::tcpPlayers.size()));
         for (int i=0; i<Player::tcpPlayers.size(); i++)
         {
             Player* p = Player::tcpPlayers[i];
@@ -268,6 +271,48 @@ void App::sendCmdLine()
             logMessage(tr("player %1 not found").arg(command[1]));
         }
 
+        return;
+    }
+    else if (str.startsWith("cleanPLayerDB", Qt::CaseInsensitive))
+    {
+        int removedEntries = 0;
+        for (int i=Player::tcpPlayers.size()-1; i>=0; i--)
+        {
+            Player* player = Player::tcpPlayers[i];
+            if (player->accessLvl < 2) //make mods immune to purges
+            {
+                int daysSinceLogin = player->lastOnline.daysTo(QDateTime::currentDateTime());
+                if (player->accessLvl < 1)  // something went wrong creating the account >> delete it
+                {
+                     logMessage(tr("removing %1 at position %2//%3\taccess level %4")
+                                   .arg(player->name)
+                                   .arg(i)
+                                   .arg(Player::tcpPlayers.size()-1)
+                                   .arg(player->accessLvl));
+                     Player::removePonies(player);
+                     Player::tcpPlayers.removeAt(i);
+                     removedEntries++;
+                     continue;
+                }
+
+                if ( (daysSinceLogin > daysToPurge) || (player->lastOnline.isNull()) ) // player hasn't been online since x days
+                {
+                    logMessage(tr("removing %1 at position %2//%3\tlast login %4 days ago")
+                                  .arg(player->name)
+                                  .arg(i)
+                                  .arg(Player::tcpPlayers.size()-1)
+                                  .arg(daysSinceLogin));
+                    Player::removePonies(player);
+                    Player::tcpPlayers.removeAt(i);
+                    removedEntries++;
+                }
+            }
+        }
+        if (!Player::savePlayers(Player::tcpPlayers))
+        {
+            logError(tr("Error saving players"));
+        }
+        logMessage(tr("removed %1 entries").arg(removedEntries));
         return;
     }
     else if (str.startsWith("SetAccess", Qt::CaseInsensitive))

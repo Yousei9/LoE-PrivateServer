@@ -341,4 +341,17 @@ QList<Pony> Player::loadPonies(Player* player)
 
     xmlfile.close();
     return ponies;
-} // end parse xml
+} // end load Ponies
+
+void Player::removePonies(Player* player)
+{
+    QString playerName = player->name.toLatin1();
+    playerName.remove(".");
+    playerName.remove("\\");
+    playerName.remove("/");
+    QDir ponyPath(QDir::currentPath()+"/data/players/"+ playerName);
+    bool result = false;
+    result = ponyPath.removeRecursively();
+    if ( result == false )
+        logError(tr("Error Removing Path %1").arg(ponyPath.absolutePath()));
+}

@@ -17,6 +17,7 @@
 #define DEFAULT_REMOTE_LOGIN_TIMEOUT 5000
 #define DEFAULT_ENABLE_GETLOG true
 #define DEFAULT_SESSKEY_VALIDATION true
+#define DEFAULT_DAYS_TO_PURGE 180
 
 #define DEFAULT_ENABLE_GAME_SERVER true
 #define DEFAULT_GAME_PORT 1039
@@ -43,6 +44,8 @@ extern int pingCheckInterval; // Time between ping timeout checks
 extern bool logInfos; // Can disable logMessage, but doesn't affect logStatusMessage
 extern QString saltPassword; // Used to check passwords between login and game servers, must be the same on all the servers involved
 extern bool enableSessKeyValidation; // Enable Session Key Validation
+extern int daysToPurge; // time since last logon before removing player
+
 extern bool enableLoginServer; // Starts a login server
 extern bool enableGameServer; // Starts a game server
 extern bool enableMultiplayer; // Sync players' positions

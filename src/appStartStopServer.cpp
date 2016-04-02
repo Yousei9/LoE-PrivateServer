@@ -145,6 +145,7 @@ void App::loadConfig()
     enableGetlog = config.value("enableGetlog", DEFAULT_ENABLE_GETLOG).toBool();
     enablePVP = config.value("enablePVP", DEFAULT_ENABLE_PVP).toBool();
     autostartClient = config.value("autostartClient",DEFAULT_AUTOSTART_CLIENT).toBool();
+    daysToPurge = config.value("daysToPurge", DEFAULT_DAYS_TO_PURGE).toInt();
 
 #ifdef USE_GUI
     app.ui->loginPortConfig->setValue(loginPort);
