@@ -28,17 +28,23 @@ void Sync::doSync()
         if (Scene::scenes[i].players.size()<2)
             continue;
         //logMessage("Syncing "+ QString().setNum(Scene::scenes[i].players.size()) +" players in scene "+ Scene::scenes[i].name);
-        for (int j=0; j<Scene::scenes[i].players.size(); j++)
+        for (int j=0; j < Scene::scenes[i].players.size(); j++)
         {
-            for (int k=0; k<Scene::scenes[i].players.size(); k++)
+            for (int k=0; k < Scene::scenes[i].players.size(); k++)
             {
                 if (j==k)
                     continue;
 
                 // sending sync to self before sync: no client updates positions
                 // sending sync to self after sync: clients sync correctly across all players (tested with 2-5 ponies)
-                sendSyncMessage(Scene::scenes[i].players[k], Scene::scenes[i].players[j]);
-                sendSyncMessage(Scene::scenes[i].players[j], Scene::scenes[i].players[j]);
+                // sending sync to self only with odd number of ponies in scene: clients sync correctly across all players (tested with 2-6 ponies)
+                sendSyncMessage(Scene::scenes[i].players[k], Scene::scenes[i].players[j]);                
+                //sendSyncMessage(Scene::scenes[i].players[j], Scene::scenes[i].players[j]); //works for up to 4 ponies
+            }
+            if (Scene::scenes[i].players.size() % 2)
+            {
+                //logMessage ("making odd numbers of ponies work?");
+                sendSyncMessage(Scene::scenes[i].players[j], Scene::scenes[i].players[j]); //makes only odd number of ponies work
             }
         }
     }
